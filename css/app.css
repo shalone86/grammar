@@ -1,0 +1,476 @@
+/* Grammar! Montessori Parts of Speech, Sentence Tracks, Drag & Drop, and Kids Controls.
+   Base styles and design tokens are in base.css. */
+
+:root {
+  /* Montessori Grammar Palette */
+  --m-noun: #1c1917; --m-noun-soft: #f5f5f4; --m-noun-ink: #292524;
+  --m-article: #38bdf8; --m-article-soft: #e0f2fe; --m-article-ink: #0369a1;
+  --m-adjective: #2563eb; --m-adjective-soft: #dbeafe; --m-adjective-ink: #1e40af;
+  --m-pronoun: #9333ea; --m-pronoun-soft: #f3e8ff; --m-pronoun-ink: #6b21a8;
+  --m-verb: #ef4444; --m-verb-soft: #fee2e2; --m-verb-ink: #991b1b;
+  --m-adverb: #f97316; --m-adverb-soft: #ffedd5; --m-adverb-ink: #9a3412;
+  --m-preposition: #16a34a; --m-preposition-soft: #dcfce7; --m-preposition-ink: #14532d;
+  --m-conjunction: #ec4899; --m-conjunction-soft: #fce7f3; --m-conjunction-ink: #9d174d;
+  --m-interjection: #eab308; --m-interjection-soft: #fef9c3; --m-interjection-ink: #713f12;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --m-noun: #3f3f46; --m-noun-soft: #27272a; --m-noun-ink: #f4f4f5;
+    --m-article: #60a5fa; --m-article-soft: #172554; --m-article-ink: #bfdbfe;
+    --m-adjective: #3b82f6; --m-adjective-soft: #1e3a8a; --m-adjective-ink: #93c5fd;
+    --m-pronoun: #a855f7; --m-pronoun-soft: #3b0764; --m-pronoun-ink: #e9d5ff;
+    --m-verb: #f87171; --m-verb-soft: #450a0a; --m-verb-ink: #fecaca;
+    --m-adverb: #fb923c; --m-adverb-soft: #431407; --m-adverb-ink: #fed7aa;
+    --m-preposition: #4ade80; --m-preposition-soft: #052e16; --m-preposition-ink: #bbf7d0;
+    --m-conjunction: #f472b6; --m-conjunction-soft: #500724; --m-conjunction-ink: #fbcfe8;
+    --m-interjection: #facc15; --m-interjection-soft: #422006; --m-interjection-ink: #fef08a;
+  }
+}
+
+/* ── Montessori Symbol & Legend ── */
+.msym { display: inline-block; vertical-align: middle; flex: none; }
+.legend-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  padding: 12px 14px; background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); margin: 18px 0 24px;
+}
+.legend-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 999px; background: var(--surface-2); font-size: 0.82rem; font-weight: 800;
+}
+
+/* ── Worlds and Stages (Home) ── */
+.world-section { margin-top: 28px; }
+.world-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.world-emoji { font-size: 2.4rem; line-height: 1; flex: none; }
+.world-header h2 { margin: 0; font-size: 1.4rem; }
+.world-header p { margin: 2px 0 0; }
+.stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+
+.stage-card {
+  display: flex; flex-direction: column; background: var(--surface); border: 2px solid var(--border);
+  border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; transition: transform .1s, border-color .1s;
+}
+.stage-card.next { border-color: var(--accent); }
+.stage-card:hover { transform: translateY(-2px); }
+.stage-main {
+  display: flex; flex-direction: column; align-items: center; padding: 14px 12px 10px;
+  color: var(--text); text-decoration: none; text-align: center; gap: 4px; flex: 1;
+}
+.stage-emoji { font-size: 2rem; margin-bottom: 2px; }
+.stage-main b { font: 800 1.05rem var(--font-display); line-height: 1.2; }
+.stage-watch {
+  display: block; text-align: center; padding: 6px 10px; background: var(--surface-2);
+  color: var(--muted); text-decoration: none; font-size: 0.8rem; font-weight: 700; border-top: 1px solid var(--border);
+}
+.stage-watch:hover { color: var(--accent-strong); background: var(--surface); }
+
+/* ── Sentence Track & Slots (Drag & Drop) ── */
+.order-game-area { display: flex; flex-direction: column; gap: 20px; margin: 12px 0; }
+.track-container {
+  padding: 16px 14px; background: var(--surface-2); border: 2px dashed var(--border);
+  border-radius: var(--radius); min-height: 94px; display: flex; align-items: center; justify-content: center;
+}
+.track-slots { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; min-height: 70px; width: 100%; }
+.track-slot {
+  min-width: 68px; min-height: 64px; border: 2px dashed var(--border); border-radius: 16px;
+  background: var(--surface); display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px; transition: border-color .15s, background-color .15s, transform .15s;
+}
+.track-slot.drop-hover { border-color: var(--good); background: var(--good-soft); transform: scale(1.05); }
+
+.bank-container { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+.bank-label { margin: 0 0 10px; font-weight: 700; }
+.bank-tray { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 70px; }
+
+/* ── Word Tiles ── */
+.word-tile {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+  border-radius: 14px; border: 2px solid var(--border); background: var(--surface);
+  box-shadow: 0 3px 0 var(--border); color: var(--text); font: 800 1.25rem var(--font-display);
+  cursor: grab; user-select: none; touch-action: none; transition: transform .1s, box-shadow .1s;
+}
+.word-tile:active { cursor: grabbing; transform: translateY(2px); box-shadow: none; }
+.word-tile.selected {
+  outline: 3px solid var(--accent); outline-offset: 3px; transform: translateY(-3px);
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.word-tile.pos-noun { border-bottom: 4px solid var(--m-noun); }
+.word-tile.pos-verb { border-bottom: 4px solid var(--m-verb); }
+.word-tile.pos-adjective { border-bottom: 4px solid var(--m-adjective); }
+.word-tile.pos-article { border-bottom: 4px solid var(--m-article); }
+.word-tile.pos-pronoun { border-bottom: 4px solid var(--m-pronoun); }
+.word-tile.pos-adverb { border-bottom: 4px solid var(--m-adverb); }
+.word-tile.pos-preposition { border-bottom: 4px solid var(--m-preposition); }
+.word-tile.pos-conjunction { border-bottom: 4px solid var(--m-conjunction); }
+
+.tile-text { pointer-events: none; }
+.tile-speak-btn {
+  background: transparent; border: none; cursor: pointer; padding: 2px;
+  font-size: 0.95rem; opacity: .5; margin-left: 2px; border-radius: 6px;
+}
+.tile-speak-btn:hover { opacity: 1; transform: scale(1.2); }
+.tile-remove-btn {
+  background: transparent; border: none; cursor: pointer; color: var(--bad);
+  font-size: 0.95rem; font-weight: 800; padding: 0 2px; margin-left: 4px;
+}
+
+.drag-ghost {
+  opacity: 0.95; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+  cursor: grabbing !important; pointer-events: none;
+}
+
+/* ── Lesson Onboarding Card (Compact for single-screen mobile view) ── */
+.onboarding-card {
+  background: var(--surface); border: 3px solid var(--border); border-radius: 22px;
+  padding: 16px 18px; box-shadow: var(--shadow); margin: 4px auto; max-width: 680px;
+}
+.onboarding-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.onboarding-badge {
+  width: 46px; height: 46px; border-radius: 14px; background: var(--surface-2);
+  border: 2px solid var(--border); display: grid; place-items: center; font-size: 1.6rem; flex-shrink: 0;
+}
+.onboarding-kicker { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent-strong); }
+.onboarding-title { margin: 2px 0 0; font-size: 1.25rem; }
+.onboarding-rule { font-size: 1rem; line-height: 1.38; margin: 6px 0 10px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); }
+.onboarding-example-box {
+  border: 2px dashed var(--accent); border-radius: 16px; padding: 10px 12px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface)); text-align: center;
+  margin-bottom: 12px;
+}
+.onboarding-example-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--accent-strong); margin-bottom: 6px; }
+.onboarding-example-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin-bottom: 6px; }
+.onboarding-caption { font-size: 0.9rem; color: var(--text); }
+.onboarding-focus { transition: all 0.25s ease; }
+.onboarding-focus.onboarding-focus-active { border-color: var(--good) !important; background: var(--good-soft) !important; transform: scale(1.06); }
+.onboarding-arrow { font-size: 1.35rem; font-weight: 900; color: var(--accent-strong); margin: 0 4px; }
+.onboarding-actions { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; }
+.onboarding-actions .btn.big { min-height: 46px; padding: 8px 20px; font-size: 1.1rem; }
+
+@media (max-width: 600px) {
+  .onboarding-card { padding: 12px 14px; border-radius: 18px; }
+  .onboarding-badge { width: 38px; height: 38px; font-size: 1.35rem; }
+  .onboarding-title { font-size: 1.05rem; }
+  .onboarding-rule { font-size: 0.9rem; padding: 6px 10px; margin-bottom: 8px; }
+  .onboarding-example-box { padding: 8px 10px; margin-bottom: 10px; }
+  .onboarding-example-row .word-tile { font-size: 1.02rem; padding: 6px 10px; }
+  .onboarding-actions .btn { padding: 8px 12px; font-size: 0.9rem; }
+  .onboarding-actions .btn.big { min-height: 42px; padding: 8px 16px; font-size: 1rem; }
+}
+.montessori-badge { display: inline-flex; margin-right: 4px; vertical-align: middle; }
+.pos-tag { display: block; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
+.cap-highlight { color: var(--good); font-weight: 900; text-decoration: underline; }
+.punct-highlight { color: var(--accent-strong); font-weight: 900; }
+
+/* ── Spacing Exercise (Squished Words + Clickable Letter Gaps) ── */
+.spacing-stage { text-align: center; padding: 18px 0; }
+.spacing-hint-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
+.sentence-spacing-strip {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+  padding: 18px 16px;
+}
+.static-word-tile { cursor: default; font-size: 1.65rem; padding: 10px 16px; }
+.spaced-word-tile { font-size: 1.65rem; padding: 10px 16px; border-color: var(--good) !important; background: var(--good-soft) !important; }
+.squished-word-tile {
+  display: inline-flex; align-items: center; padding: 8px 14px;
+  background: var(--surface); border: 3px solid var(--accent); border-radius: 18px;
+  box-shadow: 0 5px 0 var(--border); font: 800 1.85rem var(--font-display);
+}
+.squish-char-btn {
+  appearance: none; border: none; background: transparent; padding: 4px 1px;
+  font: inherit; color: var(--text); cursor: pointer; border-radius: 6px;
+}
+.squish-char-btn:hover { background: var(--surface-2); color: var(--accent-strong); }
+.letter-gap-btn {
+  appearance: none; border: none; background: transparent; width: 14px; height: 42px;
+  margin: 0 -2px; padding: 0; cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; border-radius: 6px; color: transparent; transition: all .12s;
+}
+.letter-gap-btn span { font-size: 1.1rem; font-weight: 900; }
+.letter-gap-btn:hover, .letter-gap-btn:focus-visible {
+  width: 22px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-strong);
+}
+.letter-gap-btn.wrong, .squish-char-btn.wrong {
+  background: var(--bad-soft); color: var(--bad);
+}
+.finger-space-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 10px; border-radius: 12px; background: var(--good-soft);
+  border: 2px solid var(--good); font-size: 1.35rem;
+}
+.spacing-preview { margin-top: 14px; font-weight: 800; font-size: 1.3rem; min-height: 32px; }
+
+/* ── Capitalization Exercise (All Letters / Words Clickable) ── */
+.capital-stage { text-align: center; padding: 14px 0; }
+.capital-prompt { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
+.sentence-capital-strip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 16px 20px; background: var(--surface); border: 2px solid var(--border);
+  border-radius: 20px; box-shadow: var(--shadow); font: 800 1.8rem var(--font-display);
+}
+.sentence-capital-strip.flex-wrap { flex-wrap: wrap; }
+.cap-word-box {
+  display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 14px;
+  border: 2px solid var(--border); background: var(--surface-2);
+}
+.cap-word-box.fixed-cap-word { border-color: var(--good); background: var(--good-soft); }
+.cap-letter-btn {
+  appearance: none; border: none; background: transparent; padding: 2px 3px;
+  font: 800 1.75rem var(--font-display); color: var(--text); cursor: pointer; border-radius: 6px;
+}
+.cap-letter-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.cap-letter-btn.fixed-cap { color: var(--good); text-decoration: underline; }
+.cap-letter-btn.wrong-letter { color: var(--bad); background: var(--bad-soft); }
+.capital-toggle-btn, .token-btn {
+  font: inherit; padding: 6px 12px; border-radius: 14px; border: 2px solid var(--border);
+  background: var(--surface-2); cursor: pointer; color: var(--text); transition: transform .1s;
+}
+.capital-toggle-btn:active, .token-btn:active { transform: translateY(2px); }
+.token-btn.wrong { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.letter-first { color: var(--accent-strong); text-decoration: underline; }
+.fixed-cap { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+
+/* ── Punctuation & Sentence Word Blocks ── */
+.punct-stage, .choice-stage { display: flex; justify-content: center; padding: 18px 0; }
+.sentence-blocks-row {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
+  padding: 16px; background: var(--surface); border: 2px solid var(--border);
+  border-radius: 22px; box-shadow: var(--shadow); width: 100%;
+}
+.punct-slot {
+  display: inline-grid; place-items: center; width: 58px; height: 58px;
+  border-radius: 16px; border: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  color: var(--accent-strong); font: 900 2.1rem var(--font-display);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+}
+.punct-slot.empty-box {
+  border-style: dashed;
+}
+.punct-slot.filled {
+  border-style: solid; border-color: var(--good); background: var(--good-soft); color: var(--good);
+}
+.blank-slot-tile {
+  min-width: 110px; min-height: 54px; border: 3px dashed var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface)) !important;
+  color: var(--accent-strong); display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 16px; border-radius: 16px; font: 800 1.25rem var(--font-display);
+}
+.blank-slot-placeholder { opacity: 0.85; font-size: 1rem; }
+.filled-slot-tile {
+  border: 3px solid var(--good) !important; background: var(--good-soft) !important;
+  font-size: 1.45rem; padding: 8px 16px;
+}
+
+/* ── Sentence Pick Stage (Commas & Dialogue Quotes) ── */
+.sentence-pick-stage { width: 100%; padding: 8px 0; }
+.sentence-pick-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.sentence-option-card {
+  display: flex !important; align-items: center; gap: 14px; width: 100%;
+  text-align: left; padding: 16px 20px !important; font-size: 1.28rem !important;
+  justify-content: flex-start !important;
+}
+.option-letter {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2);
+  border: 2px solid var(--border); display: grid; place-items: center;
+  font-size: 1rem; font-weight: 900; color: var(--accent-strong); flex-shrink: 0;
+}
+.option-sentence { flex: 1; line-height: 1.35; }
+
+/* ── Montessori Classifier ── */
+.classifier-stage { text-align: center; padding: 12px 0; }
+.target-badge {
+  display: inline-flex; align-items: center; gap: 10px; padding: 8px 18px;
+  border-radius: 999px; background: var(--surface-2); border: 2px solid var(--border);
+  margin-bottom: 12px; font: 800 1.15rem var(--font-display);
+}
+.target-desc { font-family: var(--font-body); font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+.classifier-prompt { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+.sentence-classify-strip { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+.classify-word-btn {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 14px; border-radius: 16px; border: 2px solid var(--border);
+  background: var(--surface); box-shadow: var(--shadow); cursor: pointer;
+  font: 800 1.35rem var(--font-display); color: var(--text); min-width: 64px;
+}
+.classify-word-btn:active { transform: translateY(2px); box-shadow: none; }
+.classify-word-btn.correct { background: var(--good-soft); border-color: var(--good); }
+.classify-word-btn.wrong { opacity: .45; border-style: dashed; }
+.classify-sym-holder { min-height: 24px; visibility: hidden; }
+.classify-sym-holder.revealed { visibility: visible; }
+
+/* ── Analysis Stage (Interactive Symbol Matching) ── */
+.analysis-stage { padding: 14px 0; text-align: center; }
+.analysis-sentence-strip { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 14px; }
+.analysis-word-col {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 6px; border-radius: 16px; transition: all .15s;
+}
+.analysis-word-col.active-word {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  outline: 3px solid var(--accent); transform: translateY(-3px);
+}
+.analysis-word-col.solved-word .analysis-word-box {
+  border-color: var(--good); background: var(--good-soft);
+}
+.analysis-sym-slot {
+  width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px;
+  background: var(--surface-2); border: 2px solid var(--border); font-weight: 900; color: var(--muted);
+}
+.analysis-sym-slot.empty { border-style: dashed; color: var(--accent-strong); }
+.analysis-word-box {
+  padding: 8px 14px; border-radius: 12px; background: var(--surface);
+  border: 2px solid var(--border); font: 800 1.25rem var(--font-display);
+}
+.analysis-pos-label { font-size: 0.75rem; font-weight: 800; color: var(--muted); min-height: 18px; }
+.analysis-palette {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.analysis-pos-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px;
+  border-radius: 14px; border: 2px solid var(--border); background: var(--surface);
+  box-shadow: 0 3px 0 var(--border); font: 800 0.95rem var(--font-display);
+  color: var(--text); cursor: pointer;
+}
+.analysis-pos-btn:active { transform: translateY(2px); box-shadow: none; }
+
+/* ── Montessori Play Mat ── */
+.mat-section { padding-bottom: 40px; }
+.mat-head h1 { margin: 0.2em 0 0.1em; }
+.mat-rail-container { margin: 18px 0; }
+.mat-rail-topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.mat-rail-title { font: 800 1.15rem var(--font-display); }
+.mat-toggles { display: flex; gap: 14px; align-items: center; }
+.mat-toggle-label { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+.mat-sentence-rail {
+  min-height: 84px; padding: 12px 14px; background: var(--surface-2);
+  border: 2px dashed var(--border); border-radius: 16px; display: flex; align-items: center; justify-content: center;
+}
+.mat-rail-track { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.mat-slot { border-style: none; background: transparent; padding: 0; min-width: auto; min-height: auto; }
+.mat-tile { font-size: 1.15rem; padding: 6px 10px; }
+.mat-space-indicator { font-weight: 800; color: var(--accent); margin: 0 4px; }
+
+.mat-drawer-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 10px; }
+.mat-tab-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px;
+  border: 2px solid var(--border); background: var(--surface); color: var(--text); font-weight: 800; cursor: pointer;
+}
+.mat-tab-btn.active { background: var(--surface-2); border-color: var(--accent); color: var(--accent-strong); }
+.mat-drawer-words { min-height: 100px; }
+.drawer-header-info { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.drawer-word-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.drawer-chip-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+  border-radius: 14px; border: 2px solid var(--border); background: var(--surface-2);
+  font: 800 1.15rem var(--font-display); color: var(--text); cursor: pointer; box-shadow: 0 2px 0 var(--border);
+}
+.drawer-chip-btn:active { transform: translateY(2px); box-shadow: none; }
+
+/* ── Grammar Sense ── */
+.sense-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 18px; }
+.sense-card { text-align: center; display: flex; flex-direction: column; align-items: center; padding: 22px 18px; }
+.sense-emoji { font-size: 3rem; margin-bottom: 4px; }
+.sense-stars { font-size: 1.4rem; color: var(--yellow); }
+.sense-q-card { text-align: center; padding: 20px 10px; }
+.sense-pos-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+  border-radius: 999px; background: var(--surface-2); border: 2px solid var(--border);
+  margin-bottom: 12px; font-weight: 800;
+}
+.sense-q-text { font: 800 1.55rem var(--font-display); margin: 0; line-height: 1.3; }
+
+/* ── Watch How ── */
+.watch-stage { padding-bottom: 40px; }
+.watch-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.watch-top h2 { margin: 0; font-size: 1.25rem; }
+.watch-screen { padding: 24px 16px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.watch-word-pill {
+  display: inline-block; padding: 8px 14px; border-radius: 14px;
+  background: var(--surface-2); border: 2px solid var(--border); font: 800 1.3rem var(--font-display);
+}
+.watch-word-pill.highlighted { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+
+/* ── Show & Copy Board (Parent Feature) ── */
+.copy-board-section { padding-bottom: 40px; }
+.copy-input-card { margin: 16px 0; }
+.copy-input-row { display: flex; gap: 10px; align-items: stretch; }
+.copy-text-input {
+  flex: 1; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--border);
+  background: var(--surface-2); color: var(--text); font: 800 1.25rem var(--font-display);
+}
+.copy-presets-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.copy-preset-btn { font-size: 0.85rem; padding: 5px 10px; }
+
+.copy-toggles-bar {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center;
+  padding: 12px 16px; margin-bottom: 16px;
+}
+.copy-toggle-item { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+
+.copy-screen-card {
+  min-height: 280px; padding: 36px 24px; display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 3px solid var(--border); border-radius: 24px;
+  box-shadow: 0 8px 0 var(--border); position: relative; overflow-x: auto;
+}
+.copy-screen-inner { width: 100%; display: flex; justify-content: center; }
+.copy-words-row { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-end; justify-content: center; }
+
+.copy-word-item {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; padding: 6px 12px; border-radius: 14px; transition: transform .12s;
+}
+.copy-word-item:hover { transform: translateY(-3px); }
+.copy-word-item.pos-noun { border-bottom: 5px solid var(--m-noun); }
+.copy-word-item.pos-verb { border-bottom: 5px solid var(--m-verb); }
+.copy-word-item.pos-adjective { border-bottom: 5px solid var(--m-adjective); }
+.copy-word-item.pos-article { border-bottom: 5px solid var(--m-article); }
+.copy-word-item.pos-pronoun { border-bottom: 5px solid var(--m-pronoun); }
+.copy-word-item.pos-adverb { border-bottom: 5px solid var(--m-adverb); }
+.copy-word-item.pos-preposition { border-bottom: 5px solid var(--m-preposition); }
+.copy-word-item.pos-conjunction { border-bottom: 5px solid var(--m-conjunction); }
+.copy-word-item.pos-interjection { border-bottom: 5px solid var(--m-interjection); }
+
+.copy-sym-badge { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.copy-pos-name { font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.copy-word-text {
+  font: 800 2.8rem/1.2 var(--font-display); color: var(--text); letter-spacing: 1px;
+}
+.copy-word-item.has-cap .copy-word-text::first-letter { color: var(--accent-strong); text-decoration: underline; }
+
+.copy-finger-space { display: inline-flex; align-items: flex-end; margin-bottom: 12px; }
+.space-pill {
+  padding: 4px 8px; border-radius: 8px; background: var(--surface-2);
+  border: 1.5px dashed var(--accent); color: var(--accent-strong); font-size: 0.85rem; font-weight: 800;
+}
+
+/* Handwriting Guidelines Mode */
+.copy-screen-card.handwriting-lines {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 36px,
+    color-mix(in srgb, var(--blue) 25%, transparent) 37px,
+    transparent 38px,
+    transparent 68px,
+    color-mix(in srgb, var(--accent) 30%, transparent) 69px,
+    transparent 70px,
+    transparent 100px,
+    color-mix(in srgb, var(--bad) 35%, transparent) 101px,
+    transparent 102px
+  );
+}
+
+.copy-screen-card.giant-font .copy-word-text { font-size: 4rem; }
+
+/* ── Responsive adjustments ── */
+@media (max-width: 600px) {
+  .stage-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .squished-box { font-size: 1.4rem; padding: 12px 16px; }
+  .punct-sentence-card { font-size: 1.4rem; padding: 14px 16px; }
+  .punct-slot { width: 44px; height: 44px; font-size: 1.5rem; }
+  .sentence-capital-strip { font-size: 1.3rem; padding: 12px 14px; }
+}
