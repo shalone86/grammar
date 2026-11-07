@@ -74,6 +74,28 @@ export function attachSentenceOrganizer({
   // Tap-to-select and tap-to-swap mechanism
   const handleTileTap = (tile) => {
     if (isDragging) return;
+    // One tap is enough for little kids: a word in the bank jumps into the next empty box,
+    // and a placed word goes back to the bank. (Dragging still moves words anywhere.)
+    if (!selectedTile) {
+      const inBank = bankEl.contains(tile);
+      const emptySlot = Array.from(trackEl.querySelectorAll(".track-slot")).find((sl) => !sl.querySelector(".word-tile"));
+      if (inBank && emptySlot) {
+        const before = FX.capture([tile]);
+        emptySlot.appendChild(tile);
+        sfx.land();
+        FX.flip(before, { dur: 280 });
+        onOrderChange?.(getCurrentOrder());
+        return;
+      }
+      if (!inBank) {
+        const before = FX.capture([tile]);
+        bankEl.appendChild(tile);
+        sfx.slide();
+        FX.flip(before, { dur: 280 });
+        onOrderChange?.(getCurrentOrder());
+        return;
+      }
+    }
     if (!selectedTile) {
       // Select this tile
       selectedTile = tile;

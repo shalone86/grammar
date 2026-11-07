@@ -4,6 +4,7 @@
 import {
   makeStage,
   lessonIntroFor,
+  STAGES,
   analyzeSentence,
   QUESTIONS_PER_STAGE,
   PARTS_OF_SPEECH,
@@ -228,7 +229,7 @@ export class Game {
           </div>
         </div>
         <div class="bank-container">
-          <p class="muted small bank-label">Words (drag or tap to place):</p>
+          <p class="muted small bank-label">Tap the words in order (or drag them):</p>
           <div class="bank-tray" aria-label="Word bank">
             ${q.scrambled.map((w, i) => {
               const targetIdx = q.targetWords.indexOf(w);
@@ -458,8 +459,8 @@ export class Game {
         </div>`;
     }
 
-    // Allow clicking individual word tiles to hear them
-    this.stageEl.addEventListener("click", (e) => {
+    // Allow clicking individual word tiles to hear them (attach once: stageEl lives for the whole stage)
+    if (!this.stageEl.dataset.speakWired) this.stageEl.dataset.speakWired = "1", this.stageEl.addEventListener("click", (e) => {
       const speakBtn = e.target.closest("[data-speak-word]");
       if (speakBtn) {
         e.stopPropagation();
@@ -697,7 +698,11 @@ export class Game {
       done: `${QUESTIONS_PER_STAGE} challenges solved!`,
       again: `#/play/${this.stage.id}`,
       onAgain: this.onAgain,
-      next: null,
+      next: (() => {
+        const i = STAGES.findIndex((x) => x.id === this.stage.id);
+        const nx = STAGES[i + 1];
+        return nx ? { href: `#/play/${nx.id}`, label: `Next: ${nx.emoji} ${nx.title} ▶` } : null;
+      })(),
     });
     this.onFinish?.({ stars, mistakes: this.mistakes });
   }

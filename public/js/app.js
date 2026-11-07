@@ -163,13 +163,21 @@ installClickSounds();
 route();
 keepDockVisible();
 
-if ("serviceWorker" in navigator && location.protocol === "https:") {
-  let refreshing = false;
+// Offline support. A new version only reloads the page when it's safe: never on the very first
+// visit (that "change" is just the offline files installing), and never in the middle of a game.
+// If an update arrives during a game, it's applied the next time the child is back home.
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let updateReady = false;
+  const reloadIfSafe = () => {
+    const inGame = document.body.classList.contains("in-game") || /^#\/(play|watch|sense)\//.test(location.hash);
+    if (updateReady && !inGame) location.reload();
+  };
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!refreshing) {
-      refreshing = true;
-      location.reload();
-    }
+    if (!hadController) return;
+    updateReady = true;
+    reloadIfSafe();
   });
+  window.addEventListener("hashchange", reloadIfSafe);
   navigator.serviceWorker.register("sw.js").then((reg) => reg.update()).catch(() => {});
 }
