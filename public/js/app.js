@@ -76,11 +76,15 @@ function viewHome() {
         <span style="color:var(--m-verb)">G</span><span style="color:var(--m-adjective)">r</span><span style="color:var(--m-noun)">a</span><span style="color:var(--m-adverb)">m</span><span style="color:var(--m-pronoun)">m</span><span style="color:var(--m-preposition)">a</span><span style="color:var(--m-conjunction)">r</span><span style="color:var(--accent)">!</span>
       </h1>
       <p class="lede">Capitals, finger spaces, ending marks, and Montessori grammar for young writers!</p>
-      <div class="row center">
-        <a class="btn big primary play-btn pulse" href="#/play/${next.id}">▶ Play (${esc(next.title)})</a>
-        <a class="btn big" href="#/copy">📝 Show & Copy</a>
-        <a class="btn big" href="#/mat">📐 Montessori Mat</a>
-        <a class="btn big" href="#/sense">⚡ Grammar Sense</a>
+      <a class="btn big primary play-btn pulse" href="#/play/${next.id}">▶ Play</a>
+      <p class="muted small">${next.emoji} ${esc(next.title)}</p>
+      <nav class="grade-jump" aria-label="Jump to a grade">
+        ${WORLDS.map((w) => `<button type="button" class="grade-chip" data-grade="${w.n}">${w.emoji} Grade ${w.n}</button>`).join("")}
+      </nav>
+      <div class="row center tools-row">
+        <a class="btn small" href="#/sense">⚡ Grammar Sense</a>
+        <a class="btn small" href="#/mat">📐 Montessori Mat</a>
+        <a class="btn small" href="#/copy">📝 Show & Copy</a>
       </div>
     </section>
 
@@ -94,7 +98,7 @@ function viewHome() {
 
     <!-- Curriculum Worlds -->
     ${WORLDS.map((w) => `
-      <section class="world-section">
+      <section class="world-section" id="grade-${w.n}">
         <div class="world-header">
           <span class="world-emoji" aria-hidden="true">${w.emoji}</span>
           <div>
@@ -120,6 +124,9 @@ function viewHome() {
     `).join("")}
 
     ${stickerBook()}`;
+  app.querySelectorAll("[data-grade]").forEach((b) => {
+    b.onclick = () => document.getElementById(`grade-${b.dataset.grade}`)?.scrollIntoView({ behavior: "smooth" });
+  });
 }
 
 function viewPlay(id) {

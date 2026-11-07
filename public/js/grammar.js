@@ -492,6 +492,9 @@ export const QUESTIONS_PER_STAGE = 5;
 
 /** Grade 1 Order Bank: 15 varied 3-4 word sentences */
 const BANK_G1_ORDER = [
+  { text: "We pray before meals.", words: ["We", "pray", "before", "meals."], scrambled: ["before", "meals.", "We", "pray"], spoken: "We pray before meals.", tags: ["pronoun", "verb", "preposition", "noun"] },
+  { text: "Bells ring on Sunday.", words: ["Bells", "ring", "on", "Sunday."], scrambled: ["ring", "Sunday.", "Bells", "on"], spoken: "Bells ring on Sunday.", tags: ["noun", "verb", "preposition", "noun"] },
+  { text: "Angels sing to God.", words: ["Angels", "sing", "to", "God."], scrambled: ["sing", "to", "God.", "Angels"], spoken: "Angels sing to God.", tags: ["noun", "verb", "preposition", "noun"] },
   { text: "The cat can jump.", words: ["The", "cat", "can", "jump."], scrambled: ["jump.", "The", "can", "cat"], spoken: "The cat can jump.", tags: ["article", "noun", "verb", "verb"] },
   { text: "A dog barked loudly.", words: ["A", "dog", "barked", "loudly."], scrambled: ["loudly.", "dog", "A", "barked"], spoken: "A dog barked loudly.", tags: ["article", "noun", "verb", "adverb"] },
   { text: "She has red apples.", words: ["She", "has", "red", "apples."], scrambled: ["apples.", "red", "She", "has"], spoken: "She has red apples.", tags: ["pronoun", "verb", "adjective", "noun"] },
@@ -511,6 +514,8 @@ const BANK_G1_ORDER = [
 
 /** Grade 1 Capital Starts: 15 varied sentences */
 const BANK_G1_CAPITAL_START = [
+  { broken: "we go to Mass on Sunday.", correct: "We go to Mass on Sunday.", badWord: "we", fixedWord: "We", hint: 'Every sentence starts with a capital! Tap "we" to make it "We".', spoken: "We go to Mass on Sunday." },
+  { broken: "my guardian angel watches over me.", correct: "My guardian angel watches over me.", badWord: "my", fixedWord: "My", hint: 'Every sentence starts with a capital! Tap "my" to make it "My".', spoken: "My guardian angel watches over me." },
   { broken: "the sun is bright today.", correct: "The sun is bright today.", badWord: "the", fixedWord: "The", hint: 'Every sentence starts with a capital! Tap "the" to make it "The".', spoken: "The sun is bright today." },
   { broken: "my puppy loves to play.", correct: "My puppy loves to play.", badWord: "my", fixedWord: "My", hint: 'Start with a capital M! Tap "my" at the beginning.', spoken: "My puppy loves to play." },
   { broken: "we saw a yellow bird.", correct: "We saw a yellow bird.", badWord: "we", fixedWord: "We", hint: 'Capitalize the first word "We" at the start of the sentence!', spoken: "We saw a yellow bird." },
@@ -530,6 +535,7 @@ const BANK_G1_CAPITAL_START = [
 
 /** Grade 1 Finger Spacing: 15 squished sentences where kids click where two words split */
 const BANK_G1_SPACING = [
+  { squished: "Welight a candle.", correct: "We light a candle.", beforeWords: [], squishedPair: ["We", "light"], afterWords: ["a", "candle."], split: ["We", "light"], spoken: "We light a candle.", hint: 'Tap between "We" and "light" to split them apart!' },
   { squished: "Thecat ran home.", correct: "The cat ran home.", beforeWords: [], squishedPair: ["The", "cat"], afterWords: ["ran", "home."], split: ["The", "cat"], spoken: "The cat ran home.", hint: 'Tap between "The" and "cat" to split them apart!' },
   { squished: "I sawared bird.", correct: "I saw a red bird.", beforeWords: ["I"], squishedPair: ["saw", "a"], afterWords: ["red", "bird."], split: ["saw", "a"], spoken: "I saw a red bird.", hint: 'Tap between "saw" and "a" to add a finger space!' },
   { squished: "Weplay soccer today.", correct: "We play soccer today.", beforeWords: [], squishedPair: ["We", "play"], afterWords: ["soccer", "today."], split: ["We", "play"], spoken: "We play soccer today.", hint: 'Tap between "We" and "play" to give them a finger space!' },
@@ -549,6 +555,9 @@ const BANK_G1_SPACING = [
 
 /** Grade 1 End Marks: 15 varied sentences */
 const BANK_G1_PUNCT_END = [
+  { lead: "Can we say grace before dinner", answer: "?", type: "question", hint: "This asks something, so it needs a question mark (?)!", spoken: "Can we say grace before dinner?", choices: [".", "?", "!"] },
+  { lead: "Hooray, it is Christmas morning", answer: "!", type: "exclamation", hint: "This shows big excitement, so it needs an exclamation mark (!)!", spoken: "Hooray, it is Christmas morning!", choices: [".", "?", "!"] },
+  { lead: "We sing in the church choir", answer: ".", type: "statement", hint: "This just tells something, so it ends with a period (.)!", spoken: "We sing in the church choir.", choices: [".", "?", "!"] },
   { lead: "Can you ride a bike", answer: "?", type: "question", hint: "This asks something, so it needs a question mark (?)!", spoken: "Can you ride a bike?", choices: [".", "?", "!"] },
   { lead: "The kitten is sleeping", answer: ".", type: "statement", hint: "This tells a calm fact, so it needs a period (.).", spoken: "The kitten is sleeping.", choices: [".", "?", "!"] },
   { lead: "Watch out for the ball", answer: "!", type: "exclamation", hint: "This is exciting or urgent, so use an exclamation mark (!)!", spoken: "Watch out for the ball!", choices: [".", "?", "!"] },
@@ -568,6 +577,20 @@ const BANK_G1_PUNCT_END = [
 
 /** Grade 1 Capital "I" and Names: 12 varied sentences */
 const BANK_G1_CAPITAL_NAMES = [
+  {
+    sentence: "After Mass, i thanked father tom.",
+    fixedSentence: "After Mass, I thanked Father Tom.",
+    tokens: [{ text: "After", cap: false }, { text: "Mass,", cap: false }, { text: "i", cap: true, fixed: "I" }, { text: "thanked", cap: false }, { text: "father", cap: true, fixed: "Father" }, { text: "tom.", cap: true, fixed: "Tom." }],
+    hint: "The word \"I\" is always a capital, and so is a name with its title: Father Tom!",
+    spoken: "After Mass, I thanked Father Tom.",
+  },
+  {
+    sentence: "Mom and i sang to baby jesus.",
+    fixedSentence: "Mom and I sang to baby Jesus.",
+    tokens: [{ text: "Mom", cap: false }, { text: "and", cap: false }, { text: "i", cap: true, fixed: "I" }, { text: "sang", cap: false }, { text: "to", cap: false }, { text: "baby", cap: false }, { text: "jesus.", cap: true, fixed: "Jesus." }],
+    hint: "The word \"I\" is always a capital, and so is the name Jesus!",
+    spoken: "Mom and I sang to baby Jesus.",
+  },
   {
     sentence: "Today i went to the zoo with maya.",
     fixedSentence: "Today I went to the zoo with Maya.",
@@ -681,6 +704,8 @@ const BANK_G1_CAPITAL_NAMES = [
 
 /** Dedicated Montessori Classifier Banks — every sentence is guaranteed to contain the target part of speech! */
 const BANK_POS_NOUN = [
+  { sentence: "The choir sang sweetly.", words: [{ word: "The", pos: "article" }, { word: "choir", pos: "noun" }, { word: "sang", pos: "verb" }, { word: "sweetly.", pos: "adverb" }], spoken: "The choir sang sweetly." },
+  { sentence: "Our priest blessed the baby.", words: [{ word: "Our", pos: "pronoun" }, { word: "priest", pos: "noun" }, { word: "blessed", pos: "verb" }, { word: "the", pos: "article" }, { word: "baby.", pos: "noun" }], spoken: "Our priest blessed the baby." },
   { sentence: "The happy puppy ran fast.", words: [{ word: "The", pos: "article" }, { word: "happy", pos: "adjective" }, { word: "puppy", pos: "noun" }, { word: "ran", pos: "verb" }, { word: "fast.", pos: "adverb" }], spoken: "The happy puppy ran fast." },
   { sentence: "A green frog hopped.", words: [{ word: "A", pos: "article" }, { word: "green", pos: "adjective" }, { word: "frog", pos: "noun" }, { word: "hopped.", pos: "verb" }], spoken: "A green frog hopped." },
   { sentence: "She baked sweet cookies.", words: [{ word: "She", pos: "pronoun" }, { word: "baked", pos: "verb" }, { word: "sweet", pos: "adjective" }, { word: "cookies.", pos: "noun" }], spoken: "She baked sweet cookies." },
@@ -696,6 +721,8 @@ const BANK_POS_NOUN = [
 ];
 
 const BANK_POS_VERB = [
+  { sentence: "Grandpa lit the candle.", words: [{ word: "Grandpa", pos: "noun" }, { word: "lit", pos: "verb" }, { word: "the", pos: "article" }, { word: "candle.", pos: "noun" }], spoken: "Grandpa lit the candle." },
+  { sentence: "The bells rang loudly.", words: [{ word: "The", pos: "article" }, { word: "bells", pos: "noun" }, { word: "rang", pos: "verb" }, { word: "loudly.", pos: "adverb" }], spoken: "The bells rang loudly." },
   { sentence: "The happy puppy jumped high.", words: [{ word: "The", pos: "article" }, { word: "happy", pos: "adjective" }, { word: "puppy", pos: "noun" }, { word: "jumped", pos: "verb" }, { word: "high.", pos: "adverb" }], spoken: "The happy puppy jumped high." },
   { sentence: "A little bird sang sweetly.", words: [{ word: "A", pos: "article" }, { word: "little", pos: "adjective" }, { word: "bird", pos: "noun" }, { word: "sang", pos: "verb" }, { word: "sweetly.", pos: "adverb" }], spoken: "A little bird sang sweetly." },
   { sentence: "The clever fox dashed away.", words: [{ word: "The", pos: "article" }, { word: "clever", pos: "adjective" }, { word: "fox", pos: "noun" }, { word: "dashed", pos: "verb" }, { word: "away.", pos: "adverb" }], spoken: "The clever fox dashed away." },
@@ -711,6 +738,8 @@ const BANK_POS_VERB = [
 ];
 
 const BANK_POS_ADJECTIVE = [
+  { sentence: "The tall candle glowed.", words: [{ word: "The", pos: "article" }, { word: "tall", pos: "adjective" }, { word: "candle", pos: "noun" }, { word: "glowed.", pos: "verb" }], spoken: "The tall candle glowed." },
+  { sentence: "A gentle angel smiled.", words: [{ word: "A", pos: "article" }, { word: "gentle", pos: "adjective" }, { word: "angel", pos: "noun" }, { word: "smiled.", pos: "verb" }], spoken: "A gentle angel smiled." },
   { sentence: "The fluffy kitten slept.", words: [{ word: "The", pos: "article" }, { word: "fluffy", pos: "adjective" }, { word: "kitten", pos: "noun" }, { word: "slept.", pos: "verb" }], spoken: "The fluffy kitten slept." },
   { sentence: "I ate a crunchy apple.", words: [{ word: "I", pos: "pronoun" }, { word: "ate", pos: "verb" }, { word: "a", pos: "article" }, { word: "crunchy", pos: "adjective" }, { word: "apple.", pos: "noun" }], spoken: "I ate a crunchy apple." },
   { sentence: "A shiny rocket flew up.", words: [{ word: "A", pos: "article" }, { word: "shiny", pos: "adjective" }, { word: "rocket", pos: "noun" }, { word: "flew", pos: "verb" }, { word: "up.", pos: "adverb" }], spoken: "A shiny rocket flew up." },
@@ -726,6 +755,7 @@ const BANK_POS_ADJECTIVE = [
 ];
 
 const BANK_POS_PRONOUN = [
+  { sentence: "We visited the church.", words: [{ word: "We", pos: "pronoun" }, { word: "visited", pos: "verb" }, { word: "the", pos: "article" }, { word: "church.", pos: "noun" }], spoken: "We visited the church." },
   { sentence: "She baked delicious cookies.", words: [{ word: "She", pos: "pronoun" }, { word: "baked", pos: "verb" }, { word: "delicious", pos: "adjective" }, { word: "cookies.", pos: "noun" }], spoken: "She baked delicious cookies." },
   { sentence: "They played under the tree.", words: [{ word: "They", pos: "pronoun" }, { word: "played", pos: "verb" }, { word: "under", pos: "preposition" }, { word: "the", pos: "article" }, { word: "tree.", pos: "noun" }], spoken: "They played under the tree." },
   { sentence: "He rode a blue scooter.", words: [{ word: "He", pos: "pronoun" }, { word: "rode", pos: "verb" }, { word: "a", pos: "article" }, { word: "blue", pos: "adjective" }, { word: "scooter.", pos: "noun" }], spoken: "He rode a blue scooter." },
@@ -741,6 +771,7 @@ const BANK_POS_PRONOUN = [
 ];
 
 const BANK_POS_ADVERB = [
+  { sentence: "The choir sang joyfully.", words: [{ word: "The", pos: "article" }, { word: "choir", pos: "noun" }, { word: "sang", pos: "verb" }, { word: "joyfully.", pos: "adverb" }], spoken: "The choir sang joyfully." },
   { sentence: "The happy puppy ran quickly.", words: [{ word: "The", pos: "article" }, { word: "happy", pos: "adjective" }, { word: "puppy", pos: "noun" }, { word: "ran", pos: "verb" }, { word: "quickly.", pos: "adverb" }], spoken: "The happy puppy ran quickly." },
   { sentence: "He spoke softly to the baby.", words: [{ word: "He", pos: "pronoun" }, { word: "spoke", pos: "verb" }, { word: "softly", pos: "adverb" }, { word: "to", pos: "preposition" }, { word: "the", pos: "article" }, { word: "baby.", pos: "noun" }], spoken: "He spoke softly to the baby." },
   { sentence: "The lion roared loudly.", words: [{ word: "The", pos: "article" }, { word: "lion", pos: "noun" }, { word: "roared", pos: "verb" }, { word: "loudly.", pos: "adverb" }], spoken: "The lion roared loudly." },
@@ -756,6 +787,7 @@ const BANK_POS_ADVERB = [
 ];
 
 const BANK_POS_PREPOSITION = [
+  { sentence: "We knelt beside the manger.", words: [{ word: "We", pos: "pronoun" }, { word: "knelt", pos: "verb" }, { word: "beside", pos: "preposition" }, { word: "the", pos: "article" }, { word: "manger.", pos: "noun" }], spoken: "We knelt beside the manger." },
   { sentence: "A bird sang in the tree.", words: [{ word: "A", pos: "article" }, { word: "bird", pos: "noun" }, { word: "sang", pos: "verb" }, { word: "in", pos: "preposition" }, { word: "the", pos: "article" }, { word: "tree.", pos: "noun" }], spoken: "A bird sang in the tree." },
   { sentence: "The puppy hid under the bed.", words: [{ word: "The", pos: "article" }, { word: "puppy", pos: "noun" }, { word: "hid", pos: "verb" }, { word: "under", pos: "preposition" }, { word: "the", pos: "article" }, { word: "bed.", pos: "noun" }], spoken: "The puppy hid under the bed." },
   { sentence: "Frogs jumped into the cool pond.", words: [{ word: "Frogs", pos: "noun" }, { word: "jumped", pos: "verb" }, { word: "into", pos: "preposition" }, { word: "the", pos: "article" }, { word: "cool", pos: "adjective" }, { word: "pond.", pos: "noun" }], spoken: "Frogs jumped into the cool pond." },
@@ -771,6 +803,7 @@ const BANK_POS_PREPOSITION = [
 ];
 
 const BANK_POS_CONJUNCTION = [
+  { sentence: "We prayed and sang.", words: [{ word: "We", pos: "pronoun" }, { word: "prayed", pos: "verb" }, { word: "and", pos: "conjunction" }, { word: "sang.", pos: "verb" }], spoken: "We prayed and sang." },
   { sentence: "They swam and played outside.", words: [{ word: "They", pos: "pronoun" }, { word: "swam", pos: "verb" }, { word: "and", pos: "conjunction" }, { word: "played", pos: "verb" }, { word: "outside.", pos: "adverb" }], spoken: "They swam and played outside." },
   { sentence: "He whispered because the baby slept.", words: [{ word: "He", pos: "pronoun" }, { word: "whispered", pos: "verb" }, { word: "because", pos: "conjunction" }, { word: "the", pos: "article" }, { word: "baby", pos: "noun" }, { word: "slept.", pos: "verb" }], spoken: "He whispered because the baby slept." },
   { sentence: "I wanted cake, but it vanished.", words: [{ word: "I", pos: "pronoun" }, { word: "wanted", pos: "verb" }, { word: "cake,", pos: "noun" }, { word: "but", pos: "conjunction" }, { word: "it", pos: "pronoun" }, { word: "vanished.", pos: "verb" }], spoken: "I wanted cake, but it vanished." },
@@ -784,6 +817,7 @@ const BANK_POS_CONJUNCTION = [
 ];
 
 const BANK_CLASSIFY = [
+  { sentence: "The kind priest smiled warmly.", words: [{ word: "The", pos: "article" }, { word: "kind", pos: "adjective" }, { word: "priest", pos: "noun" }, { word: "smiled", pos: "verb" }, { word: "warmly.", pos: "adverb" }], spoken: "The kind priest smiled warmly." },
   { sentence: "The happy puppy ran quickly.", words: [{ word: "The", pos: "article" }, { word: "happy", pos: "adjective" }, { word: "puppy", pos: "noun" }, { word: "ran", pos: "verb" }, { word: "quickly.", pos: "adverb" }], spoken: "The happy puppy ran quickly." },
   { sentence: "A little bird sang in the tree.", words: [{ word: "A", pos: "article" }, { word: "little", pos: "adjective" }, { word: "bird", pos: "noun" }, { word: "sang", pos: "verb" }, { word: "in", pos: "preposition" }, { word: "the", pos: "article" }, { word: "tree.", pos: "noun" }], spoken: "A little bird sang in the tree." },
   { sentence: "She baked sweet cookies for us.", words: [{ word: "She", pos: "pronoun" }, { word: "baked", pos: "verb" }, { word: "sweet", pos: "adjective" }, { word: "cookies", pos: "noun" }, { word: "for", pos: "preposition" }, { word: "us.", pos: "pronoun" }], spoken: "She baked sweet cookies for us." },
@@ -798,6 +832,8 @@ const BANK_CLASSIFY = [
 
 /** Grade 1 Plural Nouns (-s & -es): 12 varied sentences */
 const BANK_G1_PLURALS = [
+  { prompt: "We lit four Advent _____.", singular: "candle", correct: "candles", choices: ["candlees", "candle's", "candles"], hint: "Most words just add -s: candle → candles!", spoken: "We lit four Advent candles." },
+  { prompt: "Families sat on the long church _____.", singular: "bench", correct: "benches", choices: ["benches", "benchies", "benchs"], hint: "Words ending in -ch add -es: bench → benches!", spoken: "Families sat on the long church benches." },
   { prompt: "I saw three cute _____ in the yard.", singular: "fox", correct: "foxes", choices: ["foxes", "foxs", "foxies"], hint: "Words ending in -x add -es: fox → foxes!", spoken: "I saw three cute foxes in the yard." },
   { prompt: "Maya put the wooden _____ on the shelf.", singular: "box", correct: "boxes", choices: ["boxes", "boxs", "boxx"], hint: "Box ends in -x, so add -es: boxes!", spoken: "Maya put the wooden boxes on the shelf." },
   { prompt: "Two friendly _____ wagged their tails.", singular: "dog", correct: "dogs", choices: ["dogs", "doges", "dog's"], hint: "Most nouns just add -s: dog → dogs.", spoken: "Two friendly dogs wagged their tails." },
@@ -814,6 +850,8 @@ const BANK_G1_PLURALS = [
 
 /** Grade 2 Order Bank: 12 varied 5-6 word sentences */
 const BANK_G2_ORDER = [
+  { text: "Our family prays the rosary together.", words: ["Our", "family", "prays", "the", "rosary", "together."], scrambled: ["family", "Our", "rosary", "together.", "prays", "the"], spoken: "Our family prays the rosary together.", tags: ["pronoun", "noun", "verb", "article", "noun", "adverb"] },
+  { text: "We sang carols on Christmas Eve.", words: ["We", "sang", "carols", "on", "Christmas", "Eve."], scrambled: ["carols", "on", "sang", "Christmas", "Eve.", "We"], spoken: "We sang carols on Christmas Eve.", tags: ["pronoun", "verb", "noun", "preposition", "noun", "noun"] },
   { text: "The clever fox dashed into the woods.", words: ["The", "clever", "fox", "dashed", "into", "the", "woods."], scrambled: ["clever", "the", "dashed", "fox", "woods.", "into", "The"], spoken: "The clever fox dashed into the woods.", tags: ["article", "adjective", "noun", "verb", "preposition", "article", "noun"] },
   { text: "Three happy dolphins jumped over the waves.", words: ["Three", "happy", "dolphins", "jumped", "over", "the", "waves."], scrambled: ["jumped", "dolphins", "the", "waves.", "Three", "happy", "over"], spoken: "Three happy dolphins jumped over the waves.", tags: ["adjective", "adjective", "noun", "verb", "preposition", "article", "noun"] },
   { text: "She baked delicious cookies for Grandma.", words: ["She", "baked", "delicious", "cookies", "for", "Grandma."], scrambled: ["baked", "cookies", "Grandma.", "for", "She", "delicious"], spoken: "She baked delicious cookies for Grandma.", tags: ["pronoun", "verb", "adjective", "noun", "preposition", "noun"] },
@@ -830,6 +868,20 @@ const BANK_G2_ORDER = [
 
 /** Grade 2 Proper Nouns: 10 varied items */
 const BANK_G2_PROPER_NOUNS = [
+  {
+    sentence: "On sunday, we went to st. mary's church.",
+    fixedSentence: "On Sunday, we went to St. Mary's Church.",
+    tokens: [{ text: "On", cap: false }, { text: "sunday,", cap: true, fixed: "Sunday," }, { text: "we", cap: false }, { text: "went", cap: false }, { text: "to", cap: false }, { text: "st.", cap: true, fixed: "St." }, { text: "mary's", cap: true, fixed: "Mary's" }, { text: "church.", cap: true, fixed: "Church." }],
+    hint: "Days (Sunday) and the names of churches (St. Mary's Church) get capitals!",
+    spoken: "On Sunday, we went to St. Mary's Church.",
+  },
+  {
+    sentence: "In december, we celebrate christmas in ohio.",
+    fixedSentence: "In December, we celebrate Christmas in Ohio.",
+    tokens: [{ text: "In", cap: false }, { text: "december,", cap: true, fixed: "December," }, { text: "we", cap: false }, { text: "celebrate", cap: false }, { text: "christmas", cap: true, fixed: "Christmas" }, { text: "in", cap: false }, { text: "ohio.", cap: true, fixed: "Ohio." }],
+    hint: "Months (December), holidays (Christmas), and states (Ohio) get capitals!",
+    spoken: "In December, we celebrate Christmas in Ohio.",
+  },
   {
     sentence: "On friday, we visited chicago with uncle dan.",
     fixedSentence: "On Friday, we visited Chicago with Uncle Dan.",
@@ -904,6 +956,8 @@ const BANK_G2_PROPER_NOUNS = [
 
 /** Grade 2 Commas in a Series: 10 varied items */
 const BANK_G2_COMMAS_SERIES = [
+  { lead: "Mary Joseph and Jesus are the Holy Family.", choices: ["Mary, Joseph, and Jesus are the Holy Family.", "Mary Joseph, and Jesus are the Holy Family.", "Mary, Joseph and, Jesus are the Holy Family."], correct: "Mary, Joseph, and Jesus are the Holy Family.", hint: "Put a comma after each name in the list before 'and'!", spoken: "Mary, Joseph, and Jesus are the Holy Family." },
+  { lead: "At Mass we sing pray and listen.", choices: ["At Mass we sing, pray, and listen.", "At Mass, we sing pray and listen.", "At Mass we sing pray, and listen."], correct: "At Mass we sing, pray, and listen.", hint: "Put a comma after each action in the list before 'and'!", spoken: "At Mass we sing, pray, and listen." },
   { lead: "I bought apples bananas and grapes.", choices: ["I bought apples, bananas, and grapes.", "I bought, apples bananas, and grapes.", "I bought apples bananas, and grapes."], correct: "I bought apples, bananas, and grapes.", hint: "Put a comma after each item in the list before 'and'!", spoken: "I bought apples, bananas, and grapes." },
   { lead: "We invited Leo Maya and Sam to play.", choices: ["We invited Leo, Maya, and Sam to play.", "We invited, Leo Maya, and Sam to play.", "We, invited Leo, Maya and Sam to play."], correct: "We invited Leo, Maya, and Sam to play.", hint: "Separate people in a list with commas: Leo, Maya, and Sam.", spoken: "We invited Leo, Maya, and Sam to play." },
   { lead: "The flag is red white and blue.", choices: ["The flag is red, white, and blue.", "The flag is, red white and blue.", "The flag is red white, and blue."], correct: "The flag is red, white, and blue.", hint: "Use commas to list the colors: red, white, and blue.", spoken: "The flag is red, white, and blue." },
@@ -932,6 +986,8 @@ const BANK_G2_COMMAS_DATES = [
 
 /** Grade 2 Contractions: 12 varied sentences with blanks */
 const BANK_G2_CONTRACTIONS = [
+  { prompt: "We _____ wait to see the manger scene!", full: "cannot", correct: "can't", choices: ["can't", "cant'", "ca'nt"], hint: 'Cannot becomes can\'t: the apostrophe takes the place of the missing letters!', spoken: "We can't wait to see the manger scene!" },
+  { prompt: "Look, _____ the first Sunday of Advent!", full: "it is", correct: "it's", choices: ["it's", "its'", "i'ts"], hint: 'It + is becomes it\'s!', spoken: "Look, it's the first Sunday of Advent!" },
   { prompt: "Please _____ forget your warm jacket.", full: "do not", correct: "don't", choices: ["don't", "dont'", "do'nt"], hint: 'The apostrophe replaces the "o" in "not": don\'t!', spoken: "Please don't forget your warm jacket." },
   { prompt: "I _____ find my blue mittens.", full: "can not", correct: "can't", choices: ["can't", "cant'", "ca'nt"], hint: 'Apostrophe takes the place of "no": can\'t!', spoken: "I can't find my blue mittens." },
   { prompt: "Look outside, _____ snowing today!", full: "it is", correct: "it's", choices: ["it's", "its'", "i'ts"], hint: 'Apostrophe replaces the "i" in "is": it\'s snowing!', spoken: "Look outside, it's snowing today!" },
@@ -948,6 +1004,8 @@ const BANK_G2_CONTRACTIONS = [
 
 /** Grade 2 Past Tense: 12 varied items */
 const BANK_G2_PAST_TENSE = [
+  { prompt: "The choir _____ a beautiful song at Mass.", correct: "sang", choices: ["sing", "sang", "singed"], hint: 'Sing changes to "sang" in the past!', spoken: "The choir sang a beautiful song at Mass." },
+  { prompt: "Last night, we _____ our prayers before bed.", correct: "said", choices: ["say", "sayed", "said"], hint: 'Say changes to "said" in the past! Never "sayed".', spoken: "Last night, we said our prayers before bed." },
   { prompt: "Yesterday, Liam _____ five sweet apples.", correct: "ate", choices: ["ate", "eated", "eat"], hint: 'Eat changes to "ate" in the past! Never "eated".', spoken: "Yesterday, Liam ate five sweet apples." },
   { prompt: "Last summer, we _____ to the sandy beach.", correct: "went", choices: ["went", "goed", "go"], hint: 'Go changes to "went" in the past!', spoken: "Last summer, we went to the sandy beach." },
   { prompt: "The brave astronaut _____ into the rocket.", correct: "climbed", choices: ["climbed", "climb", "clamb"], hint: "Regular past tense adds -ed: climbed!", spoken: "The brave astronaut climbed into the rocket." },
@@ -964,6 +1022,7 @@ const BANK_G2_PAST_TENSE = [
 
 /** Grade 2 Irregular Plurals: 12 varied items */
 const BANK_G2_IRREG_PLURALS = [
+  { prompt: "The shepherds watched their _____ by night.", singular: "sheep", correct: "sheep", choices: ["sheeps", "sheep", "sheepes"], hint: "One sheep, two sheep! Sheep stays the same.", spoken: "The shepherds watched their sheep by night." },
   { prompt: "Three little _____ nibbled on the yellow cheese.", singular: "mouse", correct: "mice", choices: ["mice", "mouses", "mices"], hint: "One mouse, two mice! Never 'mouses'.", spoken: "Three little mice nibbled on the yellow cheese." },
   { prompt: "Remember to brush your _____ before bedtime.", singular: "tooth", correct: "teeth", choices: ["teeth", "tooths", "toothes"], hint: "One tooth, all your teeth!", spoken: "Remember to brush your teeth before bedtime." },
   { prompt: "The happy _____ built a giant snow fort.", singular: "child", correct: "children", choices: ["children", "childs", "childrens"], hint: "One child, many children!", spoken: "The happy children built a giant snow fort." },
@@ -980,6 +1039,8 @@ const BANK_G2_IRREG_PLURALS = [
 
 /** Grade 2 Complete vs Fragment: 12 varied items */
 const BANK_G2_FRAGMENTS = [
+  { sentence: "The bells rang on Easter morning.", isComplete: true, reason: "It has a subject (the bells) and an action (rang).", hint: "Who? The bells. What did they do? They rang. That's a complete sentence!", spoken: "The bells rang on Easter morning." },
+  { sentence: "Lit the tall Advent candle.", isComplete: false, reason: "Missing subject. Who lit the candle?", hint: "This only has an action. Who lit the candle? It needs a subject!", spoken: "Lit the tall Advent candle." },
   { sentence: "The little brown rabbit.", isComplete: false, reason: "Missing predicate (action). What did the rabbit do?", hint: "This only has a subject (who). It needs an action verb!", spoken: "The little brown rabbit." },
   { sentence: "The little brown rabbit hopped away.", isComplete: true, reason: "Complete! Subject = rabbit, predicate = hopped away.", hint: "Has both who (rabbit) and what it did (hopped)!", spoken: "The little brown rabbit hopped away." },
   { sentence: "Swam quickly across the wide river.", isComplete: false, reason: "Missing subject. Who swam?", hint: "We don't know who did the swimming! It is a fragment.", spoken: "Swam quickly across the wide river." },
@@ -996,6 +1057,7 @@ const BANK_G2_FRAGMENTS = [
 
 /** Grade 3 Order Bank: 12 complex clauses & prepositional phrases */
 const BANK_G3_ORDER = [
+  { text: "Saint Francis kindly cared for the animals.", words: ["Saint", "Francis", "kindly", "cared", "for", "the", "animals."], scrambled: ["Francis", "kindly", "the", "for", "cared", "animals.", "Saint"], spoken: "Saint Francis kindly cared for the animals.", tags: ["noun", "noun", "adverb", "verb", "preposition", "article", "noun"] },
   { text: "The brave astronaut floated through the space station.", words: ["The", "brave", "astronaut", "floated", "through", "the", "space", "station."], scrambled: ["through", "the", "floated", "brave", "The", "space", "station.", "astronaut"], spoken: "The brave astronaut floated through the space station.", tags: ["article", "adjective", "noun", "verb", "preposition", "article", "adjective", "noun"] },
   { text: "Maya read a book while rain fell outside.", words: ["Maya", "read", "a", "book", "while", "rain", "fell", "outside."], scrambled: ["fell", "outside.", "book", "rain", "Maya", "while", "a", "read"], spoken: "Maya read a book while rain fell outside.", tags: ["noun", "verb", "article", "noun", "conjunction", "noun", "verb", "adverb"] },
   { text: "Curious kittens slept between two cozy pillows.", words: ["Curious", "kittens", "slept", "between", "two", "cozy", "pillows."], scrambled: ["pillows.", "two", "slept", "between", "Curious", "cozy", "kittens"], spoken: "Curious kittens slept between two cozy pillows.", tags: ["adjective", "noun", "verb", "preposition", "adjective", "adjective", "noun"] },
@@ -1010,6 +1072,13 @@ const BANK_G3_ORDER = [
 
 /** Grade 3 Quotation Marks: 10 varied items */
 const BANK_G3_QUOTES = [
+  {
+    lead: "Peace be with you said the priest.",
+    correct: '"Peace be with you," said the priest.',
+    choices: ['"Peace be with you," said the priest.', 'Peace be "with you," said the priest.', '"Peace be with you, said the priest."'],
+    hint: 'Put quotes around the words the priest said: "Peace be with you,"',
+    spoken: '"Peace be with you," said the priest.',
+  },
   {
     lead: "Look at the shooting star yelled Leo.",
     correct: '"Look at the shooting star!" yelled Leo.',
@@ -1084,6 +1153,8 @@ const BANK_G3_QUOTES = [
 
 /** Grade 3 Possessives: 12 varied items */
 const BANK_G3_POSSESSIVES = [
+  { prompt: "The _____ bell rang for Mass.", owner: "one church", correct: "church's", choices: ["churchs", "church's", "churches'"], hint: "One church owns the bell, so add 's: church's bell!", spoken: "The church's bell rang for Mass." },
+  { prompt: "All the _____ voices filled the church.", owner: "many singers", correct: "singers'", choices: ["singer's", "singers'", "singers"], hint: "Many singers own the voices, so add just an apostrophe: singers'!", spoken: "All the singers' voices filled the church." },
   { prompt: "The _____ bright red collar had a golden bell.", owner: "one cat", correct: "cat's", choices: ["cat's", "cats'", "cats"], hint: "One cat owns the collar, so add 's: cat's collar!", spoken: "The cat's bright red collar had a golden bell." },
   { prompt: "All three _____ tails wagged happily.", owner: "three puppies", correct: "puppies'", choices: ["puppies'", "puppy's", "puppies"], hint: "More than one puppy! For plural ending in s, put the apostrophe after: puppies' tails.", spoken: "All three puppies' tails wagged happily." },
   { prompt: "We visited our _____ cozy garden yesterday.", owner: "one teacher", correct: "teacher's", choices: ["teacher's", "teachers'", "teachers"], hint: "Singular owner gets 's: teacher's garden.", spoken: "We visited our teacher's cozy garden yesterday." },
@@ -1100,6 +1171,8 @@ const BANK_G3_POSSESSIVES = [
 
 /** Grade 3 Subject-Verb Agreement: 12 varied items */
 const BANK_G3_AGREEMENT = [
+  { prompt: "Grandma _____ the rosary every evening.", subject: "Grandma (singular)", correct: "prays", choices: ["prays", "pray"], hint: "One person takes a verb with -s: Grandma prays.", spoken: "Grandma prays the rosary every evening." },
+  { prompt: "The altar servers _____ the candles.", subject: "The altar servers (plural)", correct: "carry", choices: ["carries", "carry"], hint: "More than one takes a verb without -s: the servers carry.", spoken: "The altar servers carry the candles." },
   { prompt: "The hungry puppy _____ its tasty dinner.", subject: "The hungry puppy (singular)", correct: "eats", choices: ["eats", "eat"], hint: "One puppy takes a verb with -s: The puppy eats.", spoken: "The hungry puppy eats its tasty dinner." },
   { prompt: "The two playful kittens _____ around the yarn.", subject: "The two playful kittens (plural)", correct: "dance", choices: ["dance", "dances"], hint: "Plural subject (kittens) takes a base verb without -s: kittens dance.", spoken: "The two playful kittens dance around the yarn." },
   { prompt: "Maya and Leo _____ to the park after school.", subject: "Maya and Leo (compound plural)", correct: "walk", choices: ["walk", "walks"], hint: "Two people = plural! Maya and Leo walk.", spoken: "Maya and Leo walk to the park after school." },
@@ -1116,6 +1189,7 @@ const BANK_G3_AGREEMENT = [
 
 /** Grade 3 Comparatives & Superlatives: 12 varied items */
 const BANK_G3_COMPARATIVES = [
+  { prompt: "The Easter candle is _____ than the little candles.", base: "tall", correct: "taller", choices: ["tallest", "taller", "more tall"], hint: "Comparing two things uses -er: taller than!", spoken: "The Easter candle is taller than the little candles." },
   { prompt: "A cheetah is _____ than a turtle.", base: "fast", correct: "faster", choices: ["faster", "fastest", "more fast"], hint: "Comparing two things uses -er: faster than!", spoken: "A cheetah is faster than a turtle." },
   { prompt: "Mount Everest is the _____ mountain on Earth.", base: "high", correct: "highest", choices: ["highest", "higher", "most high"], hint: "Comparing all mountains uses -est: the highest!", spoken: "Mount Everest is the highest mountain on Earth." },
   { prompt: "This math puzzle is _____ than the last one.", base: "difficult", correct: "more difficult", choices: ["more difficult", "difficultest", "difficulter"], hint: "Long adjectives use 'more': more difficult!", spoken: "This math puzzle is more difficult than the last one." },
@@ -1132,6 +1206,7 @@ const BANK_G3_COMPARATIVES = [
 
 /** Grade 3 Commas in Addresses: 10 varied items */
 const BANK_G3_COMMAS_ADDRESS = [
+  { lead: "After we prayed the rosary we ate dinner.", correct: "After we prayed the rosary, we ate dinner.", choices: ["After we prayed the rosary, we ate dinner.", "After, we prayed the rosary we ate dinner.", "After we prayed, the rosary we ate dinner."], hint: "Put a comma after the starting part: After we prayed the rosary,", spoken: "After we prayed the rosary, we ate dinner." },
   { lead: "We mailed a postcard to Seattle Washington.", correct: "We mailed a postcard to Seattle, Washington.", choices: ["We mailed a postcard to Seattle, Washington.", "We mailed, a postcard to Seattle Washington.", "We mailed a postcard, to Seattle Washington."], hint: "Separate city from state with a comma: Seattle, Washington.", spoken: "We mailed a postcard to Seattle, Washington." },
   { lead: "When the school bell rang we lined up.", correct: "When the school bell rang, we lined up.", choices: ["When the school bell rang, we lined up.", "When, the school bell rang we lined up.", "When the school, bell rang we lined up."], hint: "Put a comma after the introductory clause: When the school bell rang,", spoken: "When the school bell rang, we lined up." },
   { lead: "My pen pal lives in Orlando Florida.", correct: "My pen pal lives in Orlando, Florida.", choices: ["My pen pal lives in Orlando, Florida.", "My pen pal, lives in Orlando Florida.", "My pen pal lives, in Orlando Florida."], hint: "Comma between city and state: Orlando, Florida.", spoken: "My pen pal lives in Orlando, Florida." },

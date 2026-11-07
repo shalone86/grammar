@@ -90,7 +90,7 @@ export class Game {
       if (!this.alive) return;
 
       if (result.solvedByChild) {
-        say(this.bubble, `${pick(["Awesome!", "You did it!", "Great job!", "Spot on!"])}`, { speakText: false });
+        say(this.bubble, `${pick(["Awesome!", "You did it!", "Great job!", "Spot on!", "Your guardian angel is cheering for you!", "Way to let your light shine!"])}`, { speakText: false });
         this.dots[k]?.classList.add("done");
       } else {
         this.dots[k]?.classList.add("assisted");
