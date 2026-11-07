@@ -495,3 +495,53 @@
 .grade-chip:active { transform: translateY(3px); box-shadow: none; }
 #grade-1, #grade-2, #grade-3 { scroll-margin-top: 70px; }
 .tools-row { margin-top: 12px; }
+
+/* ───────── Small screens ───────── */
+@media (max-width: 480px) {
+  .play { padding-bottom: 150px; }
+  .play-top { padding: 4px 0; }
+  .bubble { min-height: 0; padding: 6px 8px 6px 10px; margin-bottom: 8px; }
+  .mascot { font-size: 1.8rem; }
+  .say { font-size: 1rem; }
+  .game-stage { padding: 10px; }
+  .word-tile { font-size: 1.05rem; padding: 6px 10px; }
+  .track-slots, .bank-tray { gap: 6px; min-height: 54px; }
+}
+/* Phones turned sideways: the sentence on the left, everything else in a column on the right. */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.in-game main { max-width: none; padding: 4px 12px 12px; padding-right: 268px; }
+  .play { padding-bottom: 12px; }
+  .play-top { position: fixed; right: 0; top: 0; width: 256px; z-index: 31; padding: 6px 10px; }
+  .icon-btn { width: 36px; height: 36px; font-size: 1rem; border-radius: 11px; }
+  .dots i { width: 11px; height: 11px; }
+  .bubble { position: fixed; right: 0; top: 50px; width: 256px; z-index: 31; margin: 0; min-height: 0; padding: 4px 8px; border-radius: 0; border-width: 0 0 2px 2px; box-shadow: none; }
+  .mascot { font-size: 1.5rem; }
+  .say { font-size: .92rem; }
+  .dock { left: auto; right: 0; top: 0; bottom: 0; width: 256px; justify-content: flex-end; gap: 8px; background: var(--bg);
+    border-top: none; border-left: 2px solid var(--border); padding: 8px 10px max(10px, env(safe-area-inset-bottom)); }
+  .game-stage { padding: 8px; }
+  .word-tile { font-size: 1rem; padding: 5px 9px; }
+  .track-slots, .bank-tray { gap: 6px; min-height: 48px; }
+  .choices { flex-direction: column; align-items: stretch; gap: 6px; }
+  .choice-card { min-height: 52px; padding: 6px 10px; font-size: 1.3rem; }
+  .analysis-palette { grid-template-columns: repeat(2, 1fr) !important; gap: 6px; }
+  .btn.big { font-size: 1.05rem; padding: 8px 14px; min-height: 46px; }
+  .onboarding-card { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; align-items: start; padding: 10px 12px; }
+  .onboarding-header { grid-column: 1 / -1; }
+  .onboarding-rule { grid-column: 1; }
+  .onboarding-example-box { grid-column: 2; grid-row: 2 / span 2; }
+  .onboarding-actions { grid-column: 1; justify-content: flex-start; }
+  .hero { padding-top: 8px; }
+  .finish { padding-top: 8px; }
+}
+/* Parts-of-speech analysis on phones: smaller word boxes and buttons, so the whole sentence shows. */
+@media (max-width: 480px), (orientation: landscape) and (max-height: 520px) {
+  .analysis-sentence-strip { gap: 6px !important; }
+  .analysis-word-col { min-width: 0 !important; padding: 2px !important; }
+  .analysis-sym-slot { width: 30px !important; height: 30px !important; font-size: .9rem !important; }
+  .analysis-word-box { font-size: 1rem !important; padding: 4px 8px !important; }
+  .analysis-pos-label { font-size: .65rem !important; min-height: 0 !important; }
+  .analysis-pos-btn { padding: 5px 8px !important; font-size: .85rem !important; gap: 4px !important; }
+  .analysis-palette { gap: 5px !important; }
+  .classifier-prompt { margin: 0 0 6px !important; font-size: 1rem !important; }
+}
