@@ -78,6 +78,7 @@ export function viewSense(app, levelId) {
           ${q.choices.map((c) => `<button class="choice-card" data-val="${esc(c)}">${esc(c)}</button>`).join("")}
         </div>`;
 
+      let missed = false;
       await new Promise((resolve) => {
         dock.querySelectorAll("[data-val]").forEach((btn) => {
           btn.onclick = () => {
@@ -88,11 +89,12 @@ export function viewSense(app, levelId) {
               btn.classList.add("right");
               sfx.right();
               FX.confetti(20);
-              dots[k]?.classList.add("done");
+              dots[k]?.classList.add(missed ? "assisted" : "done"); // yellow if it took a mistake
               S.solvedOne();
               resolve();
             } else {
               mistakes++;
+              missed = true;
               btn.classList.add("wrong");
               btn.disabled = true;
               sfx.oops();

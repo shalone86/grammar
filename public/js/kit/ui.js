@@ -7,11 +7,15 @@ import { health } from "./api.js";
 import { sfx } from "./sound.js";
 import { confetti } from "./fx.js";
 import { spoken } from "./speech.js";
+import { vary } from "./vary.js";
+import { STICKER_WORLD } from "./stickers.js";
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ESC[c]);
 export const pick = (a) => a[Math.floor(Math.random() * a.length)];
-export const STICKERS = ["🦄", "🚀", "🦖", "🌈", "🍕", "🐙", "⚽", "🎈", "🦋", "🍩", "🐢", "🌟", "🐝", "🍦", "🦕", "🐼", "🏆", "🎸", "🐬", "🍉"];
+export const STICKERS = ["🦄", "🚀", "🦖", "🌈", "🐙", "🎈", "🦋", "🐢", "🌟", "🐝", "🦕", "🐼", "🐬", "🐶", "🐱", "🐴", "🐑", "🐸",
+  "🦉", "🐞", "🦊", "🐻", "🐧", "🐳", "🦒", "🐘", "🐰", "🦆", "🚂", "🚁", "⛵", "🚒", "🚜", "🎠", "🏰", "🏡", "⛪", "🌳", "🌻",
+  "🍄", "🌷", "⛲", "🧸", "🪁", "🍩", "🍦", "🍉", "🕊️", "👼", "🐟"];
 
 export const starsHtml = (n) => `<span class="stars" aria-label="${n} of 3 stars">${"★".repeat(n)}<span class="off">${"★".repeat(3 - n)}</span></span>`;
 export const starsFor = (mistakes) => (mistakes === 0 ? 3 : mistakes <= 3 ? 2 : 1);
@@ -36,54 +40,55 @@ export function say(bubble, text, { speakText = true, spokenOverride = null } = 
   if (speakText) speak(bubble.lastSaid);
 }
 
-/** Stars, a sticker (big for perfect, mini if mistakes), confetti and "play again / next". */
+/** Mark a progress dot: green when solved alone, yellow when it needed a mistake or a hint. */
+export function markDot(root, k, helped) {
+  const d = root.querySelector(`[data-dot="${k}"]`);
+  d?.classList.remove("now");
+  d?.classList.add(helped ? "assisted" : "done");
+}
+
+/**
+ * Stars, the level's sticker, confetti and "play again / next". One sticker per level: giant
+ * with no mistakes, mini otherwise; a mini sticker grows into a giant one after a perfect replay.
+ */
 export function showFinish(app, { id, stars, mistakes, title, done, again, next, onAgain }) {
   document.body.classList.remove("in-game");
-  const isPerfect = mistakes === 0;
-  const chosenEmoji = pick(STICKERS);
-  const stickerEntry = isPerfect ? chosenEmoji : { emoji: chosenEmoji, mini: true };
-  S.finishLevel(id, stars, stickerEntry);
+  const perfect = mistakes === 0;
+  const st = S.finishLevel(id, stars, pick(STICKERS), perfect);
   sfx.fanfare();
-  confetti(isPerfect ? 100 : 40);
+  confetti(perfect ? 100 : 45);
+  const line = st.grew ? "Your sticker grew into a GIANT sticker!"
+    : st.isNew && st.big ? "A giant sticker! No mistakes at all!"
+    : st.isNew ? "A mini sticker! Play again with no mistakes to make it giant."
+    : st.big ? (perfect ? "No mistakes at all. Wow!" : done)
+    : perfect ? "" : "No mistakes next time, and your mini sticker grows giant!";
+  const label = st.grew ? "It grew! 🌟" : st.isNew ? (st.big ? "Giant sticker!" : "Mini sticker!") : st.big ? "Your giant sticker" : "Your mini sticker";
   app.innerHTML = `
     <section class="finish">
       <div class="big-stars">${starsHtml(stars)}</div>
-      <h1>${isPerfect ? "Perfect Score! 🌟" : title}</h1>
-      <p class="new-sticker ${isPerfect ? "big-sticker" : "mini-sticker"}">
-        <span>${chosenEmoji}</span><br>
-        ${isPerfect ? "🌟 Giant Perfect Sticker!" : "Mini Sticker Earned!"}
-      </p>
-      <p class="muted">
-        ${isPerfect
-          ? "You got every single question right on your own! Wow!"
-          : "Almost there! Try the lesson again with no mistakes to win a GIANT sticker!"}
-      </p>
+      <h1>${perfect ? vary("perfect", ["Perfect!", "No mistakes!", "Super star!"]) : title}</h1>
+      <p class="new-sticker ${st.big ? "big-sticker" : "mini-sticker"}${st.grew ? " grew" : ""}"><span>${st.e}</span><br>${label}</p>
+      ${line ? `<p class="muted">${esc(line)}</p>` : ""}
       <div class="row center">
-        <a class="btn big ${isPerfect ? "" : "primary pulse"}" href="${again}" data-again>
-          🔁 ${isPerfect ? "Play again" : "Try Again for Perfect!"}
-        </a>
-        ${next ? `<a class="btn big ${isPerfect ? "primary" : ""}" href="${next.href}">${next.label}</a>` : `<a class="btn big ${isPerfect ? "primary" : ""}" href="#/">🏠 Home</a>`}
+        <a class="btn big${st.big ? "" : " primary"}" href="${again}" data-again>🔁 ${st.big ? "Play again" : "Try for giant!"}</a>
+        ${next ? `<a class="btn big${st.big ? " primary" : ""}" href="${next.href}">${next.label}</a>` : `<a class="btn big${st.big ? " primary" : ""}" href="#/">🏠 Home</a>`}
       </div>
+      ${STICKER_WORLD ? `<p><a class="btn world-link" href="${STICKER_WORLD}">🌍 Play in Sticker World</a></p>` : ""}
     </section>`;
-  speak(
-    isPerfect
-      ? "Amazing job! You got a perfect score and earned a giant sticker!"
-      : "Good practice! You got a mini sticker. Try the lesson again to get a perfect score and win a giant sticker!"
-  );
+  speak(st.grew ? "Wow! Your sticker grew into a giant sticker!"
+    : st.isNew && st.big ? vary("giant", ["You did it with no mistakes! You got a giant sticker!", "Perfect! Here's a giant sticker!"])
+    : st.isNew ? vary("mini", ["You did it! You got a mini sticker. Play again with no mistakes to make it giant!", "Nice work! Here's a mini sticker. No mistakes next time makes it giant!"])
+    : perfect ? "You did it! No mistakes!" : "You did it!");
   if (onAgain) app.querySelector("[data-again]").onclick = (e) => { e.preventDefault(); onAgain(); };
 }
 
 export function stickerBook() {
   const st = S.stickers();
-  const renderSticker = (s) => {
-    if (s && typeof s === "object") {
-      return `<span class="sticker-item mini" title="Mini sticker">${s.emoji || "⭐"}</span>`;
-    }
-    return `<span class="sticker-item big" title="Giant Perfect Sticker">${s}</span>`;
-  };
   return `<section class="sticker-book">
       <h2>My stickers <small>${S.solved()} solved</small></h2>
-      ${st.length ? `<div class="stickers">${st.map(renderSticker).join("")}</div>` : `<p class="muted small">Finish a level to get your first sticker!</p>`}
+      ${st.length ? `<div class="stickers">${st.map((s) => `<span class="${s.big ? "big" : "mini"}" title="${s.big ? "giant" : "mini"} sticker">${s.e}</span>`).join("")}</div>`
+        : `<p class="muted small">Finish a level to get your first sticker! No mistakes makes it a giant one.</p>`}
+      ${STICKER_WORLD && st.length ? `<a class="btn world-link" href="${STICKER_WORLD}">🌍 Play in Sticker World</a>` : ""}
     </section>`;
 }
 

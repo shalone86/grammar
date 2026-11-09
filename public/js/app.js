@@ -2,6 +2,7 @@
 // Plain ES modules, no build step.
 
 import * as S from "./kit/store.js";
+import { jingleOnce } from "./kit/jingle.js";
 S.init("grammar:v1", {
   montessoriColors: true,
   speakWordsOnTap: true,
@@ -167,6 +168,7 @@ function viewPlay(id) {
 }
 
 installClickSounds();
+jingleOnce("grammar", () => S.settings().sounds); // the app's little logo sound, on the first tap
 route();
 keepDockVisible();
 

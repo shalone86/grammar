@@ -72,6 +72,7 @@ export class Game {
       }
 
       let result = { solvedByChild: true };
+      const before = this.mistakes;
 
       if (q.mode === "order") {
         result = await this.playOrder(q);
@@ -89,9 +90,11 @@ export class Game {
 
       if (!this.alive) return;
 
-      if (result.solvedByChild) {
+      if (result.solvedByChild && this.mistakes === before) {
         say(this.bubble, `${pick(["Awesome!", "You did it!", "Great job!", "Spot on!", "Your guardian angel is cheering for you!", "Way to let your light shine!"])}`, { speakText: false });
         this.dots[k]?.classList.add("done");
+      } else if (result.solvedByChild) {
+        this.dots[k]?.classList.add("assisted"); // got there after a mistake: yellow
       } else {
         this.dots[k]?.classList.add("assisted");
       }
