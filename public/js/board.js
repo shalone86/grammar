@@ -378,7 +378,7 @@ export function initSpacingExercise(stageEl, question, onAnswer) {
 
   stageEl.innerHTML = `
     <div class="spacing-stage">
-      <p class="spacing-hint-text">Two words are squished together! Tap right where the <b>finger space</b> 👉 belongs:</p>
+      <p class="spacing-hint-text">Two words are squished together! Tap or slide your finger right where the <b>finger space</b> 👉 belongs:</p>
       <div class="sentence-spacing-strip">
         ${beforeWords.map((w) => `<div class="word-tile static-word-tile"><span class="tile-text">${w}</span></div>`).join("")}
         <div class="squished-word-tile" data-squished-tile>
@@ -426,10 +426,54 @@ export function initSpacingExercise(stageEl, question, onAnswer) {
     }
   }
 
+  // Sliding a finger between the letters (kids do this without being told): the gap under the
+  // finger lights up as it moves. A quick swipe counts where the finger landed (a "cut" down or a
+  // push apart); a slow slide counts where the finger is lifted.
+  let suppressClickUntil = 0;
+  const chars = [...stageEl.querySelectorAll(".squish-char-btn")];
+  const gaps = [...stageEl.querySelectorAll(".letter-gap-btn")];
+  const gapAt = (x) => {
+    let best = 1, bestD = Infinity;
+    for (let i = 1; i < chars.length; i++) {
+      const a = chars[i - 1].getBoundingClientRect(), b = chars[i].getBoundingClientRect();
+      const d = Math.abs(x - (a.right + b.left) / 2);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+  };
+  const light = (i) => gaps.forEach((g) => g.classList.toggle("hot", i != null && Number(g.dataset.splitAt) === i));
+  squishTile?.addEventListener("pointerdown", (e) => {
+    if (solved || chars.length < 2) return;
+    const x0 = e.clientX, y0 = e.clientY, t0 = performance.now();
+    let moved = false;
+    const move = (ev) => {
+      if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 10) {
+        moved = true; // only now follow the finger everywhere (a plain tap still goes to the letter buttons)
+        try { squishTile.setPointerCapture(ev.pointerId); } catch { /* ignore */ }
+      }
+      if (moved) light(gapAt(ev.clientX));
+    };
+    const up = (ev) => {
+      squishTile.removeEventListener("pointermove", move);
+      squishTile.removeEventListener("pointerup", up);
+      squishTile.removeEventListener("pointercancel", up);
+      light(null);
+      if (!moved || ev.type === "pointercancel" || solved) return;
+      suppressClickUntil = performance.now() + 400; // the drag is the answer, not a tap
+      const quick = performance.now() - t0 < 350, vertical = Math.abs(ev.clientY - y0) > Math.abs(ev.clientX - x0);
+      const idx = quick || vertical ? gapAt(x0) : gapAt(ev.clientX);
+      handleAttempt(idx, gaps.find((g) => Number(g.dataset.splitAt) === idx) ?? squishTile);
+    };
+    squishTile.addEventListener("pointermove", move);
+    squishTile.addEventListener("pointerup", up);
+    squishTile.addEventListener("pointercancel", up);
+  });
+
   // Clicking a gap between letters
   stageEl.querySelectorAll(".letter-gap-btn").forEach((btn) => {
     btn.onclick = (e) => {
       e.stopPropagation();
+      if (performance.now() < suppressClickUntil) return;
       const idx = Number(btn.dataset.splitAt);
       handleAttempt(idx, btn);
     };
@@ -439,6 +483,7 @@ export function initSpacingExercise(stageEl, question, onAnswer) {
   stageEl.querySelectorAll(".squish-char-btn").forEach((btn) => {
     btn.onclick = (e) => {
       e.stopPropagation();
+      if (performance.now() < suppressClickUntil) return;
       const cIdx = Number(btn.dataset.charIdx);
       if (cIdx === splitIdx - 1 || cIdx === splitIdx) {
         handleAttempt(splitIdx, btn);

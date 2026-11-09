@@ -191,6 +191,9 @@
 .letter-gap-btn:hover, .letter-gap-btn:focus-visible {
   width: 22px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-strong);
 }
+.squished-word-tile[data-squished-tile] { touch-action: none; } /* sliding a finger shouldn't scroll the page */
+.letter-gap-btn.hot { background: var(--yellow-soft, #fff4cc); transform: scaleY(1.25); }
+.letter-gap-btn.hot span { color: var(--accent-strong); }
 .letter-gap-btn.wrong, .squish-char-btn.wrong {
   background: var(--bad-soft); color: var(--bad);
 }
