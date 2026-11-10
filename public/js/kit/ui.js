@@ -15,7 +15,10 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ESC[c]);
 export const pick = (a) => a[Math.floor(Math.random() * a.length)];
 export const STICKERS = ["🦄", "🚀", "🦖", "🌈", "🐙", "🎈", "🦋", "🐢", "🌟", "🐝", "🦕", "🐼", "🐬", "🐶", "🐱", "🐴", "🐑", "🐸",
   "🦉", "🐞", "🦊", "🐻", "🐧", "🐳", "🦒", "🐘", "🐰", "🦆", "🚂", "🚁", "⛵", "🚒", "🚜", "🎠", "🏰", "🏡", "⛪", "🌳", "🌻",
-  "🍄", "🌷", "⛲", "🧸", "🪁", "🍩", "🍦", "🍉", "🕊️", "👼", "🐟"];
+  "🍄", "🌷", "⛲", "🧸", "🪁", "🍩", "🍦", "🍉", "🕊️", "👼", "🐟",
+  // From our faith (about one sticker in four): church, cross, rosary, candle, praying hands, bread and
+  // grapes, the Lamb, a bell, a rose for Mary, the star of Bethlehem, the ox and donkey at the manger.
+  "⛪", "✝️", "📿", "🕯️", "🙏", "🍞", "🍇", "🐑", "🔔", "🌹", "🌟", "🐂", "🫏", "👼", "🕊️"];
 
 export const starsHtml = (n) => `<span class="stars" aria-label="${n} of 3 stars">${"★".repeat(n)}<span class="off">${"★".repeat(3 - n)}</span></span>`;
 export const starsFor = (mistakes) => (mistakes === 0 ? 3 : mistakes <= 3 ? 2 : 1);

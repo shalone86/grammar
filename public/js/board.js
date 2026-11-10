@@ -43,6 +43,7 @@ export function attachSentenceOrganizer({
   tags = [],
   onOrderChange,
   onCheck,
+  onTileTap = null, // custom tap (the Mat: a tap reads the word aloud instead of moving it)
 }) {
   let draggedEl = null;
   let ghostEl = null;
@@ -74,6 +75,7 @@ export function attachSentenceOrganizer({
   // Tap-to-select and tap-to-swap mechanism
   const handleTileTap = (tile) => {
     if (isDragging) return;
+    if (onTileTap) { onTileTap(tile); return; }
     // One tap is enough for little kids: a word in the bank jumps into the next empty box,
     // and a placed word goes back to the bank. (Dragging still moves words anywhere.)
     if (!selectedTile) {
@@ -101,7 +103,7 @@ export function attachSentenceOrganizer({
       selectedTile = tile;
       tile.classList.add("selected");
       sfx.select();
-      tile.animate?.([{ transform: "scale(1)" }, { transform: "scale(1.1)" }, { transform: "scale(1.05)" }], { duration: 200, fill: "forwards" });
+      tile.animate?.([{ transform: "scale(1)" }, { transform: "scale(1.1)" }, { transform: "scale(1)" }], { duration: 200 }); // no fill: never leave a tile stuck scaled
     } else if (selectedTile === tile) {
       // Deselect
       selectedTile.classList.remove("selected");
@@ -143,13 +145,17 @@ export function attachSentenceOrganizer({
     FX.flip(before, { dur: 280 });
   }
 
-  // Pointer drag events on tiles
+  // Pointer drag events on tiles. One drag at a time; the move/up listeners live on the window and
+  // every way a drag can end (drop, a cancelled drag, the page changing) removes the floating copy,
+  // so a word can never be left hovering on screen.
+  let endDrag = null;
   const onPointerDown = (e) => {
     const tile = e.target.closest(".word-tile");
-    if (!tile || e.target.closest(".tile-speak-btn")) return;
+    if (!tile || e.target.closest(".tile-speak-btn, .tile-remove-btn")) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (draggedEl) return; // already dragging (a second finger, or a second click)
 
-    tile.setPointerCapture(e.pointerId);
+    try { tile.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     draggedEl = tile;
     startX = e.clientX;
     startY = e.clientY;
@@ -157,99 +163,79 @@ export function attachSentenceOrganizer({
     updateSlots();
 
     const onPointerMove = (moveEvent) => {
-      if (!draggedEl) return;
+      if (moveEvent.pointerId !== e.pointerId || !draggedEl) return;
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
 
       if (!isDragging && Math.hypot(dx, dy) > 8) {
         isDragging = true;
         sfx.lift();
-
-        // Create ghost clone in FX layer
         const r = draggedEl.getBoundingClientRect();
+        ghostEl?.remove(); // never more than one floating copy
+        document.querySelectorAll(".drag-ghost").forEach((g) => g.remove());
         ghostEl = draggedEl.cloneNode(true);
+        ghostEl.classList.remove("selected");
         ghostEl.classList.add("drag-ghost");
         Object.assign(ghostEl.style, {
-          position: "fixed",
-          left: `${r.left}px`,
-          top: `${r.top}px`,
-          width: `${r.width}px`,
-          height: `${r.height}px`,
-          zIndex: 9999,
-          pointerEvents: "none",
-          transform: "scale(1.08)",
-          boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
+          position: "fixed", left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`,
+          margin: "0", zIndex: 9999, pointerEvents: "none", transform: "scale(1.08)", boxShadow: "0 12px 24px rgba(0,0,0,0.25)",
         });
         document.body.appendChild(ghostEl);
         draggedEl.style.opacity = "0.3";
       }
 
       if (isDragging && ghostEl) {
-        const r = draggedEl.getBoundingClientRect();
         ghostEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.08)`;
-
-        // Highlight nearest slot
-        const cx = moveEvent.clientX;
-        const cy = moveEvent.clientY;
-        dropSlots.forEach((s) => {
-          const hit = cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom;
-          s.el.classList.toggle("drop-hover", hit);
-        });
+        const cx = moveEvent.clientX, cy = moveEvent.clientY;
+        dropSlots.forEach((s) => s.el.classList.toggle("drop-hover", cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom));
       }
     };
 
-    const onPointerUp = (upEvent) => {
-      tile.releasePointerCapture(e.pointerId);
-      tile.removeEventListener("pointermove", onPointerMove);
-      tile.removeEventListener("pointerup", onPointerUp);
-      tile.removeEventListener("pointercancel", onPointerUp);
-
-      if (!isDragging) {
-        // Was a tap!
-        handleTileTap(tile);
-        draggedEl = null;
-        return;
-      }
-
-      // Drag finished
-      const cx = upEvent.clientX;
-      const cy = upEvent.clientY;
-      const targetSlot = dropSlots.find((s) => cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom);
-
+    const finish = () => {
+      removeEventListener("pointermove", onPointerMove, true);
+      removeEventListener("pointerup", onPointerUp, true);
+      removeEventListener("pointercancel", onPointerUp, true);
+      try { tile.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
       dropSlots.forEach((s) => s.el.classList.remove("drop-hover"));
-
-      if (ghostEl) {
-        ghostEl.remove();
-        ghostEl = null;
-      }
-      draggedEl.style.opacity = "1";
-
-      if (targetSlot) {
-        const existingTile = targetSlot.el.querySelector(".word-tile");
-        if (existingTile && existingTile !== draggedEl) {
-          // Swap with tile in target slot
-          swapOrMoveTiles(draggedEl, existingTile);
-        } else {
-          targetSlot.el.appendChild(draggedEl);
-          sfx.land();
-        }
-        onOrderChange?.(getCurrentOrder());
-      } else {
-        // Dropped outside: return or return to bank if was in bank
-        sfx.pop();
-      }
-
+      ghostEl?.remove();
+      ghostEl = null;
+      if (draggedEl) draggedEl.style.opacity = "";
       draggedEl = null;
+      endDrag = null;
       isDragging = false;
     };
+    endDrag = finish;
 
-    tile.addEventListener("pointermove", onPointerMove);
-    tile.addEventListener("pointerup", onPointerUp);
-    tile.addEventListener("pointercancel", onPointerUp);
+    const onPointerUp = (upEvent) => {
+      if (upEvent.pointerId !== e.pointerId) return;
+      const wasDragging = isDragging, el = draggedEl;
+      // A cancelled drag (the browser took over, e.g. a Mac text drag) puts everything back.
+      if (upEvent.type === "pointercancel" || !el?.isConnected) { finish(); return; }
+      if (!wasDragging) { finish(); handleTileTap(el); return; }
+      const cx = upEvent.clientX, cy = upEvent.clientY;
+      const targetSlot = dropSlots.find((s) => s.el.isConnected && cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom);
+      finish();
+      if (targetSlot) {
+        const existingTile = targetSlot.el.querySelector(".word-tile");
+        if (existingTile && existingTile !== el) swapOrMoveTiles(el, existingTile);
+        else if (!existingTile) { targetSlot.el.appendChild(el); sfx.land(); }
+        onOrderChange?.(getCurrentOrder());
+      } else {
+        sfx.pop(); // dropped outside: it stays where it was
+      }
+    };
+
+    addEventListener("pointermove", onPointerMove, true);
+    addEventListener("pointerup", onPointerUp, true);
+    addEventListener("pointercancel", onPointerUp, true);
   };
+  // Stop the browser's own drag-and-drop (Mac: dragging text or a tile as an image).
+  const noNativeDrag = (e) => { if (e.target.closest?.(".word-tile")) e.preventDefault(); };
+  trackEl.addEventListener("dragstart", noNativeDrag);
+  bankEl.addEventListener("dragstart", noNativeDrag);
 
   // Allow clicking on empty slots to place the selected tile
-  trackEl.addEventListener("click", (e) => {
+  const onSlotClick = (e) => {
     const slot = e.target.closest(".track-slot");
     if (slot && selectedTile && !slot.querySelector(".word-tile")) {
       swapOrMoveTiles(selectedTile, slot);
@@ -258,7 +244,8 @@ export function attachSentenceOrganizer({
       selectedTile = null;
       onOrderChange?.(getCurrentOrder());
     }
-  });
+  };
+  trackEl.addEventListener("click", onSlotClick);
 
   // Attach listeners
   trackEl.addEventListener("pointerdown", onPointerDown);
@@ -276,6 +263,10 @@ export function attachSentenceOrganizer({
       bankEl.removeEventListener("pointerdown", onPointerDown);
       trackEl.removeEventListener("click", handleWordSpeak);
       bankEl.removeEventListener("click", handleWordSpeak);
+      trackEl.removeEventListener("click", onSlotClick);
+      trackEl.removeEventListener("dragstart", noNativeDrag);
+      bankEl.removeEventListener("dragstart", noNativeDrag);
+      endDrag?.();
       if (ghostEl) ghostEl.remove();
     },
   };

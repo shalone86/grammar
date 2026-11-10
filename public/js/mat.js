@@ -167,14 +167,14 @@ export function viewMat(app) {
       bankEl: wordsEl,
       targetWords: sentence.map((s) => s.word),
       tags: sentence.map((s) => s.pos),
-      onOrderChange: (newOrder) => {
-        // Rebuild sentence array matching newOrder
-        const newSentence = [];
-        newOrder.forEach((w) => {
-          const match = sentence.find((item) => item.word === w);
-          if (match) newSentence.push(match);
-        });
-        sentence = newSentence;
+      // A tap reads the word (it used to move the word out of the sentence into the drawer).
+      onTileTap: (tile) => { sfx.click(); speak(tile.dataset.word.replace(/[.,!?]/g, ""), { force: true }); },
+      onOrderChange: () => {
+        // Rebuild by each tile's place in the old sentence (works with repeated words like "the"),
+        // then redraw so the ✕ buttons and positions match again.
+        const order = [...railEl.querySelectorAll(".word-tile")].map((t) => Number(t.dataset.idx));
+        sentence = order.map((i) => sentence[i]).filter(Boolean);
+        setTimeout(renderSentence, 300); // after the slide animation
       },
     });
 

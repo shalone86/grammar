@@ -85,6 +85,8 @@
 .bank-tray { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 70px; }
 
 /* ── Word Tiles ── */
+/* Dragging words: no text selection or native image drag (Mac), and a finger drag doesn't scroll. */
+.word-tile { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; touch-action: none; }
 .word-tile {
   display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
   border-radius: 14px; border: 2px solid var(--border); background: var(--surface);
