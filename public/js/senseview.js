@@ -40,6 +40,8 @@ export function viewSense(app, levelId) {
       <div class="play-top">
         <a class="icon-btn" href="#/sense" aria-label="Exit">✕</a>
         <div class="dots">${Array.from({ length: SENSE_QUESTIONS_PER_ROUND }, (_, k) => `<i data-dot="${k}"></i>`).join("")}</div>
+        <button class="icon-btn" data-read title="Read it to me" aria-label="Read it to me">💬</button>
+        <button class="icon-btn" data-hint title="Hint" aria-label="Hint">💡</button>
       </div>
       <div class="bubble" aria-live="polite">
         <span class="mascot" aria-hidden="true">${level.emoji}</span>
@@ -56,6 +58,15 @@ export function viewSense(app, levelId) {
 
   let alive = true;
   let mistakes = 0;
+  let current = null;
+  // 💬 reads the question and every choice; 💡 gives the hint.
+  const readText = (q) => `${q.q} Is it ${q.choices.join(", ").replace(/, ([^,]*)$/, ", or $1")}?`;
+  app.querySelector("[data-read]").onclick = () => current && speak(readText(current), { force: true });
+  app.querySelector("[data-hint]").onclick = () => {
+    if (!current) return;
+    const meta = current.pos ? PARTS_OF_SPEECH[current.pos] : null;
+    say(bubble, `💡 ${current.hint || (meta ? meta.hint || `Think about ${meta.name.toLowerCase()}s.` : "Read each choice carefully!")}`);
+  };
 
   (async () => {
     const questions = makeSenseRound(level.id);
@@ -69,38 +80,19 @@ export function viewSense(app, levelId) {
         <div class="sense-q-card">
           ${meta ? `<div class="sense-pos-badge">${montessoriSvg(q.pos, 28)} <span>${meta.name}</span></div>` : ""}
           <p class="sense-q-text">${esc(q.q)}</p>
-          <div class="sense-q-actions" style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
-            <button class="btn ghost sm" type="button" id="sense-read-btn">🔊 Read</button>
-            <button class="btn ghost sm" type="button" id="sense-hint-btn">💡 Hint</button>
-          </div>
         </div>`;
-
-      say(bubble, q.q);
-      stage.querySelector("#sense-read-btn").onclick = () => speak(q.q, { force: true });
-      stage.querySelector("#sense-hint-btn").onclick = () => {
-        const hintMsg = q.hint || (meta ? `Think about ${meta.name.toLowerCase()}.` : "Read each choice carefully!");
-        say(bubble, hintMsg);
-      };
+      current = q;
+      say(bubble, q.q, { spokenOverride: readText(q) }); // read the choices too, for kids still learning to read
 
       dock.innerHTML = `
         <div class="choices">
-          ${q.choices.map((c) => `
-            <div style="display:flex;gap:8px;align-items:stretch;">
-              <button class="choice-card" style="flex:1;" data-val="${esc(c)}">${esc(c)}</button>
-              <button class="btn ghost sm" type="button" data-speak-choice="${esc(c)}" aria-label="Read choice aloud" style="padding:0 12px;min-width:44px;">🔊</button>
-            </div>`).join("")}
+          ${q.choices.map((c) => `<button class="choice-card" data-val="${esc(c)}">${esc(c)}</button>`).join("")}
         </div>`;
 
-      let missed = false;
+      let missed = false, revealed = false;
       await new Promise((resolve) => {
         let qMistakes = 0;
         let finished = false;
-        dock.querySelectorAll("[data-speak-choice]").forEach((sbtn) => {
-          sbtn.onclick = (e) => {
-            e.stopPropagation();
-            speak(sbtn.dataset.speakChoice, { force: true });
-          };
-        });
         dock.querySelectorAll("[data-val]").forEach((btn) => {
           btn.onclick = () => {
             if (finished) return;
@@ -130,12 +122,9 @@ export function viewSense(app, levelId) {
                   if (b.dataset.val === q.answer) b.classList.add("right");
                 });
                 dots[k]?.classList.add("assisted");
-                say(bubble, `I'll give you the answer! It's "${q.answer}".`);
-                const nextWrap = document.createElement("div");
-                nextWrap.style.cssText = "margin-top:12px;display:flex;justify-content:center;";
-                nextWrap.innerHTML = `<button class="btn primary" type="button" id="sense-next-btn">Next Question ▶</button>`;
-                dock.appendChild(nextWrap);
-                nextWrap.querySelector("#sense-next-btn").onclick = () => resolve();
+                say(bubble, `Here's the answer: "${q.answer}". ${q.hint ?? ""}`);
+                revealed = true;
+                setTimeout(resolve, 1400); // let them see the answer, then the usual Next button
               } else {
                 say(bubble, q.hint || "Try another choice!");
               }
@@ -145,7 +134,7 @@ export function viewSense(app, levelId) {
       });
 
       if (!alive) return;
-      say(bubble, `${pick(["Yes!", "Super!", "Correct!"])}`);
+      if (!revealed) say(bubble, `${pick(["Yes!", "Super!", "Correct!"])}`);
       await nextButton(dock, k < SENSE_QUESTIONS_PER_ROUND - 1 ? "Next ▶" : "Finish 🏁");
     }
 

@@ -1785,6 +1785,21 @@ export function lessonIntroFor(stage) {
   const s = typeof stage === "string" ? stageById(stage) : stage;
   if (!s) return null;
 
+  if (s.mode === "montessori-intro") {
+    const list = (s.posList || ["article", "adjective", "noun", "verb"]).map((k) => PARTS_OF_SPEECH[k]).filter(Boolean);
+    const say = { noun: "a big black triangle", verb: "a red circle", adjective: "a medium blue triangle", article: "a small light blue triangle",
+      pronoun: "a tall purple triangle", adverb: "a small orange circle", preposition: "a green crescent, like a bridge", conjunction: "a pink bar, like a ribbon that joins",
+      interjection: "a gold keyhole shape" };
+    return {
+      badgeHtml: montessoriSvg("noun", 34),
+      title: "Meet the Montessori colors",
+      rule: "Every kind of word has its own <b>shape and color</b>. Look at each one, and listen!",
+      exampleHtml: `<div class="mi-legend">${list.map((m) => `
+        <div class="mi-legend-row onboarding-focus">${montessoriSvg(m.id, 30)}<b style="color:${m.colorInk ?? m.colorDark ?? m.color}">${m.name}</b><span>${m.desc}</span></div>`).join("")}</div>`,
+      voice: `Every kind of word has its own shape and color. ${list.map((m) => `${m.name}: ${say[m.id] ?? "its own symbol"}. ${m.desc}.`).join(" ")} Now let's practice!`,
+    };
+  }
+
   if (s.mode === "classify" && s.targetPos) {
     const meta = PARTS_OF_SPEECH[s.targetPos];
     const examples = {

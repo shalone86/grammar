@@ -47,6 +47,43 @@ export class Game {
     this.mistakes = 0;
   }
 
+  /** What 💬 reads: the instruction, the sentence (never in a way that gives the answer away) and the choices. */
+  readAloudText(q) {
+    const plain = (t) => String(t ?? "").replace(/<[^>]+>/g, "").replace(/_{2,}/g, " blank ").replace(/\s+/g, " ").trim();
+    const parts = [plain(q.instruction)];
+    const words = (list) => (list ?? []).map((w) => (typeof w === "string" ? w : w.word)).join(" ");
+    let sentence = "";
+    if (q.mode === "order") sentence = q.scrambled?.length ? `The words are: ${q.scrambled.join(", ")}.` : "";
+    else if (q.mode === "montessori-intro") sentence = "";
+    else if (q.mode === "capital-start" || q.mode === "capital-names" || q.mode === "capital-proper") sentence = q.broken ?? q.spoken ?? "";
+    else if (q.mode === "spacing") sentence = q.correct ?? q.spoken ?? "";
+    else if (q.mode === "classify" || q.mode === "analysis") sentence = q.spoken ?? q.sentence ?? words(q.words);
+    else sentence = q.sentence ?? q.prompt ?? q.lead ?? q.text ?? ""; // choice questions: the sentence with its blank, never the answer
+    if (sentence && !parts[0].includes(plain(sentence))) parts.push(plain(sentence));
+    if (q.mode === "montessori-intro" && q.askType === "name") {
+      parts.push(`Is it ${q.choices.map((c) => PARTS_OF_SPEECH[c]?.name ?? c).join(", ").replace(/, ([^,]*)$/, ", or $1")}?`);
+    } else if (Array.isArray(q.choices) && q.choices.length && q.choices.every((c) => typeof c === "string") && q.mode !== "montessori-intro") {
+      const names = q.choices.map((c) => ({ ".": "period", "?": "question mark", "!": "exclamation point", ",": "comma" }[c] ?? c));
+      parts.push(`Is it ${names.join(", ").replace(/, ([^,]*)$/, ", or $1")}?`);
+    }
+    return parts.filter(Boolean).join(" ");
+  }
+
+  /** 💬 in the top bar: read the question again. */
+  readCurrent() {
+    if (!this.current) return;
+    sfx.click?.();
+    speak(this.readAloudText(this.current), { force: true });
+  }
+
+  /** 💡 in the top bar: a hint for the question on screen. */
+  hintCurrent() {
+    if (!this.current) return;
+    const q = this.current;
+    const meta = q.targetPos ? PARTS_OF_SPEECH[q.targetPos] : null;
+    say(this.bubble, `💡 ${q.hint || meta?.hint || "Read it slowly, one word at a time. You can tap 💬 to hear it again!"}`);
+  }
+
   async play() {
     // 1. Show Lesson Onboarding + 1 worked example before Question 1
     await this.showOnboarding();
@@ -60,14 +97,18 @@ export class Game {
     for (let k = 0; k < QUESTIONS_PER_STAGE && this.alive; k++) {
       this.updateDots(k);
       const q = questions[k];
+      this.current = q;
       this.dock.innerHTML = "";
       this.stageEl.innerHTML = "";
 
+      // Grade 1 readers hear the whole question (the sentence and the choices), not just the instruction;
+      // not in sentence-order levels, where hearing the sentence would give the answer away.
+      const readAll = this.stage.world === 1 && q.mode !== "order" && q.mode !== "montessori-intro";
       if (k === 0 || this.stage.mode === "mix") {
-        say(this.bubble, q.instruction);
+        say(this.bubble, q.instruction, readAll ? { spokenOverride: this.readAloudText(q) } : {});
       } else {
         const leadIn = FOLLOWUP_PROMPTS[(k - 1) % FOLLOWUP_PROMPTS.length];
-        const spokenPrompt = q.clue ? `${leadIn} Find ${q.clue}!` : leadIn;
+        const spokenPrompt = readAll ? `${leadIn} ${this.readAloudText(q)}` : q.clue ? `${leadIn} Find ${q.clue}!` : leadIn;
         say(this.bubble, `<b>${leadIn}</b> ${q.instruction}`, { spokenOverride: spokenPrompt });
       }
 
@@ -293,27 +334,13 @@ export class Game {
     });
   }
 
-  addReadSentenceBtn(container, text) {
-    if (!container || !text) return;
-    const cleanText = String(text).replace(/_+/g, "blank").trim();
-    if (!cleanText) return;
-    const wrap = document.createElement("div");
-    wrap.style.cssText = "display:flex;justify-content:center;margin:6px 0 8px;";
-    wrap.innerHTML = `<button class="btn ghost sm" type="button">🔊 Read Sentence</button>`;
-    wrap.querySelector("button").onclick = () => {
-      sfx.click();
-      speak(cleanText, { force: true });
-    };
-    container.appendChild(wrap);
-  }
+
 
   /**
    * Capital letters exercise (in-place mistake handling).
    */
   async playCapital(q) {
     this.dock.innerHTML = "";
-    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
-    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initCapitalExercise(this.stageEl, q, async ({ correct }) => {
@@ -337,8 +364,6 @@ export class Game {
    */
   async playSpacing(q) {
     this.dock.innerHTML = "";
-    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
-    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initSpacingExercise(this.stageEl, q, async ({ correct }) => {
@@ -362,8 +387,6 @@ export class Game {
    */
   async playClassify(q) {
     this.dock.innerHTML = "";
-    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
-    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initClassifierExercise(this.stageEl, q, async ({ correct }) => {
@@ -523,34 +546,6 @@ export class Game {
 
     this.stageEl.revealSolution = fillVisualSlot;
 
-    const choiceSentence = q.spoken || q.sentence || q.lead || "";
-    if (choiceSentence && q.mode !== "sentence-pick") {
-      this.addReadSentenceBtn(this.stageEl, choiceSentence);
-    }
-
-    if (q.mode === "sentence-pick") {
-      this.dock.querySelectorAll("[data-choice-idx]").forEach((btn) => {
-        const idx = Number(btn.dataset.choiceIdx);
-        const text = choices[idx];
-        const wrap = document.createElement("div");
-        wrap.style.cssText = "display:flex;gap:8px;align-items:stretch;";
-        btn.parentNode.insertBefore(wrap, btn);
-        btn.style.flex = "1";
-        wrap.appendChild(btn);
-        const sbtn = document.createElement("button");
-        sbtn.type = "button";
-        sbtn.className = "btn ghost sm";
-        sbtn.style.cssText = "padding:0 12px;min-width:44px;";
-        sbtn.textContent = "🔊";
-        sbtn.setAttribute("aria-label", "Read choice aloud");
-        sbtn.onclick = (e) => {
-          e.stopPropagation();
-          sfx.click();
-          speak(text, { force: true });
-        };
-        wrap.appendChild(sbtn);
-      });
-    }
 
     const allButtons = [
       ...this.stageEl.querySelectorAll("[data-choice-idx]"),
@@ -599,60 +594,27 @@ export class Game {
     let questionMistakes = 0;
 
     if (q.askType === "symbol" || q.askType === "example") {
-      const heading = q.askType === "example" ? `"${meta.examples?.[0] || meta.name}" (${meta.name})` : meta.name;
+      const ex = meta.examples?.[0] || "";
       this.stageEl.innerHTML = `
-        <div class="sense-q-card">
-          <div style="font-size:1.35rem;font-weight:800;margin-bottom:4px;">${esc(heading)}</div>
-          <p class="sense-q-text" style="margin:4px 0;">${esc(meta.desc)} (like <i>"${esc(meta.examples?.[0] || "")}"</i>)</p>
-          <div style="display:flex;justify-content:center;margin-top:8px;">
-            <button class="btn ghost sm" type="button" id="mi-read-btn">🔊 Read</button>
-          </div>
+        <div class="mi-card">
+          <div class="mi-name" style="--c:${meta.color}">${esc(q.askType === "example" ? `"${ex}"` : meta.name)}</div>
+          <p class="mi-desc">${q.askType === "example" ? `This word is ${/^[aeiou]/i.test(meta.name) ? "an" : "a"} <b>${esc(meta.name.toLowerCase())}</b>.` : `${esc(meta.desc)}${ex ? `, like <i>${esc(ex)}</i>` : ""}.`}</p>
         </div>`;
       this.dock.innerHTML = `
-        <div class="choices" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr));display:grid;gap:10px;">
-          ${q.choices.map((posKey) => `
-            <button class="choice-card" type="button" data-pos="${posKey}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;min-height:84px;">
-              ${montessoriSvg(posKey, 48)}
-            </button>`).join("")}
+        <div class="mi-symbols">
+          ${q.choices.map((posKey) => `<button class="choice-card mi-sym" type="button" data-pos="${posKey}" aria-label="${esc(PARTS_OF_SPEECH[posKey].name)} symbol">${montessoriSvg(posKey, 44)}</button>`).join("")}
         </div>`;
     } else {
       this.stageEl.innerHTML = `
-        <div class="sense-q-card" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-          <div>${montessoriSvg(q.targetPos, 64)}</div>
-          <p class="sense-q-text" style="margin:0;">Which part of speech has this symbol?</p>
-          <button class="btn ghost sm" type="button" id="mi-read-btn">🔊 Read</button>
+        <div class="mi-card">
+          <div class="mi-big">${montessoriSvg(q.targetPos, 72)}</div>
+          <p class="mi-desc">Which part of speech has this symbol?</p>
         </div>`;
       this.dock.innerHTML = `
-        <div class="choices">
-          ${q.choices.map((posKey) => {
-            const m = PARTS_OF_SPEECH[posKey];
-            return `
-              <div style="display:flex;gap:8px;align-items:stretch;">
-                <button class="choice-card" type="button" data-pos="${posKey}" style="flex:1;text-align:left;">
-                  <b>${esc(m.name)}</b> <span style="opacity:0.75;font-size:0.9em;">— ${esc(m.desc)}</span>
-                </button>
-                <button class="btn ghost sm" type="button" data-speak-pos="${posKey}" aria-label="Read ${esc(m.name)}" style="padding:0 12px;min-width:44px;">🔊</button>
-              </div>`;
-          }).join("")}
+        <div class="choices mi-names">
+          ${q.choices.map((posKey) => `<button class="choice-card" type="button" data-pos="${posKey}">${esc(PARTS_OF_SPEECH[posKey].name)}</button>`).join("")}
         </div>`;
     }
-
-    const readBtn = this.stageEl.querySelector("#mi-read-btn");
-    if (readBtn) {
-      readBtn.onclick = () => {
-        sfx.click();
-        speak(q.askType === "symbol" || q.askType === "example" ? `${meta.name}. ${meta.desc}.` : q.instruction, { force: true });
-      };
-    }
-
-    this.dock.querySelectorAll("[data-speak-pos]").forEach((sbtn) => {
-      sbtn.onclick = (e) => {
-        e.stopPropagation();
-        sfx.click();
-        const m = PARTS_OF_SPEECH[sbtn.dataset.speakPos];
-        if (m) speak(`${m.name}. ${m.desc}.`, { force: true });
-      };
-    });
 
     const buttons = [...this.dock.querySelectorAll("[data-pos]")];
     return new Promise((resolve) => {

@@ -133,7 +133,7 @@ function viewHome() {
   });
   const lastW = Number(S.settings().lastWorld || 0);
   if (lastW > 1) {
-    requestAnimationFrame(() => document.getElementById(`grade-${lastW}`)?.scrollIntoView({ behavior: "auto" }));
+    setTimeout(() => document.getElementById(`grade-${lastW}`)?.scrollIntoView({ behavior: "auto", block: "start" }), 0);
   }
 }
 
@@ -152,6 +152,8 @@ function viewPlay(id) {
       <div class="play-top">
         <a class="icon-btn" href="#/" aria-label="Exit">✕</a>
         <div class="dots">${Array.from({ length: 5 }, (_, k) => `<i data-dot="${k}"></i>`).join("")}</div>
+        <button class="icon-btn" data-read title="Read it to me" aria-label="Read it to me">💬</button>
+        <button class="icon-btn" data-hint title="Hint" aria-label="Hint">💡</button>
         <button class="icon-btn toggle" data-voice title="Read aloud">🔊</button>
       </div>
       <div class="bubble" aria-live="polite">
@@ -168,6 +170,8 @@ function viewPlay(id) {
     onAgain: () => viewPlay(id),
   });
 
+  app.querySelector("[data-read]").onclick = () => game.readCurrent();
+  app.querySelector("[data-hint]").onclick = () => game.hintCurrent();
   game.play();
 
   return () => {

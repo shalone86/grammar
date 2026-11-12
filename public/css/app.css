@@ -550,3 +550,20 @@
   .analysis-palette { gap: 5px !important; }
   .classifier-prompt { margin: 0 0 6px !important; font-size: 1rem !important; }
 }
+
+/* Montessori colors level: the card, the symbol buttons, and the legend on the "How it works" card */
+.mi-card { text-align: center; padding: 6px 4px; }
+.mi-name { font: 800 1.6rem var(--font-display); color: var(--c, var(--text)); }
+.mi-desc { margin: 4px 0 0; font-size: 1.1rem; }
+.mi-big { display: grid; place-items: center; margin: 4px 0; }
+.mi-symbols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 520px; margin: 0 auto; }
+.mi-symbols .mi-sym { min-height: 64px; padding: 8px 4px; display: grid; place-items: center; }
+.mi-legend { display: grid; gap: 6px; text-align: left; }
+.mi-legend-row { display: grid; grid-template-columns: 34px auto 1fr; align-items: center; gap: 8px; font-size: .95rem; }
+.mi-legend-row span { color: var(--muted); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .mi-symbols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mi-symbols .mi-sym { min-height: 54px; }
+  .mi-legend { grid-template-columns: 1fr 1fr; }
+  .mi-legend-row span { display: none; }
+}
