@@ -191,6 +191,16 @@ export const WORLDS = [
 export const STAGES = [
   // ── Grade 1 ──
   {
+    id: "g1-montessori-colors",
+    world: 1,
+    title: "Montessori Colors & Symbols",
+    emoji: "🔺",
+    mode: "montessori-intro",
+    posList: ["article", "adjective", "noun", "verb"],
+    blurb: "Learn the Montessori colors and shapes for nouns, verbs, adjectives, and articles!",
+    why: "Montessori colors and shapes help you see what every word does in a sentence.",
+  },
+  {
     id: "g1-order-simple",
     world: 1,
     title: "Sentence Scramble",
@@ -285,6 +295,16 @@ export const STAGES = [
   },
 
   // ── Grade 2 ──
+  {
+    id: "g2-montessori-colors",
+    world: 2,
+    title: "Montessori Colors & Symbols",
+    emoji: "🔺",
+    mode: "montessori-intro",
+    posList: ["article", "adjective", "noun", "verb", "pronoun", "adverb"],
+    blurb: "Meet the Montessori colors and shapes for pronouns and adverbs, plus Grade 1 favorites!",
+    why: "Knowing each Montessori symbol makes spotting parts of speech easy.",
+  },
   {
     id: "g2-order-medium",
     world: 2,
@@ -388,6 +408,16 @@ export const STAGES = [
   },
 
   // ── Grade 3 ──
+  {
+    id: "g3-montessori-colors",
+    world: 3,
+    title: "Montessori Colors & Symbols",
+    emoji: "🔺",
+    mode: "montessori-intro",
+    posList: ["noun", "verb", "adjective", "pronoun", "adverb", "preposition", "conjunction", "interjection"],
+    blurb: "Master all Montessori grammar colors and shapes, including prepositions and conjunctions!",
+    why: "Every part of speech has its own Montessori color and shape.",
+  },
   {
     id: "g3-order-complex",
     world: 3,
@@ -1307,7 +1337,7 @@ function shuffle(arr, seed = 0) {
 }
 
 function itemKey(item) {
-  return String(item.spoken || item.sentence || item.prompt || item.lead || item.correct || item.text || "");
+  return String(item.key || item.spoken || item.sentence || item.prompt || item.lead || item.correct || item.text || "");
 }
 
 function pickRotating(bank, seed = 1, avoidKeys = []) {
@@ -1682,6 +1712,38 @@ export function makeStage(stage, seed = 1, avoidKeys = []) {
       }));
     }
 
+    case "montessori-intro": {
+      const pool = s.posList || ["article", "adjective", "noun", "verb"];
+      const askTypes = pool.length * 2 >= QUESTIONS_PER_STAGE * 2 ? ["symbol", "name"] : ["symbol", "name", "example"];
+      const bank = pool.flatMap((pos) => askTypes.map((askType) => ({ key: `${s.id}-${pos}-${askType}`, pos, askType })));
+      const sh = pickRotating(bank, seed, avoidKeys);
+      return sh.map((item, idx) => {
+        const { pos, askType } = item;
+        const meta = PARTS_OF_SPEECH[pos];
+        const others = shuffle(pool.filter((p) => p !== pos), seed + idx * 13).slice(0, 3);
+        const choices = shuffle([pos, ...others], seed + idx * 17);
+        const exWord = meta.examples?.[0] || pos;
+        const instruction = askType === "symbol"
+          ? `Tap the Montessori symbol for ${meta.name} (${meta.desc})!`
+          : askType === "example"
+            ? `Tap the Montessori symbol for the ${meta.name.toLowerCase()} "${exWord}"!`
+            : `Which part of speech uses this Montessori symbol?`;
+        return {
+          stageId: s.id,
+          key: item.key,
+          mode: "montessori-intro",
+          askType,
+          targetPos: pos,
+          answer: pos,
+          choices,
+          index: idx,
+          instruction,
+          spoken: `${meta.name}! ${meta.desc}.`,
+          hint: meta.hint,
+        };
+      });
+    }
+
     case "analysis": {
       const sh = pickRotating(BANK_CLASSIFY, seed, avoidKeys);
       return sh.map((item, idx) => ({
@@ -2037,6 +2099,26 @@ export function lessonIntroFor(stage) {
           <div class="word-tile">turtle.</div>
         </div><div class="onboarding-caption">Comparing two animals uses <b>-er (faster)</b>!</div>`,
       };
+
+    case "montessori-intro": {
+      const list = s.posList || ["article", "adjective", "noun", "verb"];
+      const cardsHtml = list.map((p) => {
+        const meta = PARTS_OF_SPEECH[p];
+        return `<div class="word-tile pos-${p}" style="display:inline-flex;align-items:center;gap:6px;">
+          <span class="montessori-badge">${montessoriSvg(p, 20)}</span>
+          <span><b>${meta.name}</b></span>
+        </div>`;
+      }).join("");
+      const names = list.map((p) => PARTS_OF_SPEECH[p].name).join(", ");
+      return {
+        title: s.title,
+        badgeHtml: "🔺",
+        voice: `Welcome to Montessori Colors and Symbols! Every part of speech has its own special color and shape. Today you will learn ${names}. Let's match them together!`,
+        rule: `Each part of speech has its own <b>Montessori color and shape</b>!`,
+        exampleHtml: `<div class="onboarding-example-row" style="flex-wrap:wrap;gap:8px;">${cardsHtml}</div>
+          <div class="onboarding-caption">Look at the colors and shapes — then match each one!</div>`,
+      };
+    }
 
     case "analysis":
       return {

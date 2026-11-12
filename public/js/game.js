@@ -84,6 +84,8 @@ export class Game {
         result = await this.playClassify(q);
       } else if (q.mode === "analysis") {
         result = await this.playAnalysis(q);
+      } else if (q.mode === "montessori-intro") {
+        result = await this.playMontessoriIntro(q);
       } else {
         result = await this.playChoice(q);
       }
@@ -291,11 +293,27 @@ export class Game {
     });
   }
 
+  addReadSentenceBtn(container, text) {
+    if (!container || !text) return;
+    const cleanText = String(text).replace(/_+/g, "blank").trim();
+    if (!cleanText) return;
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:flex;justify-content:center;margin:6px 0 8px;";
+    wrap.innerHTML = `<button class="btn ghost sm" type="button">🔊 Read Sentence</button>`;
+    wrap.querySelector("button").onclick = () => {
+      sfx.click();
+      speak(cleanText, { force: true });
+    };
+    container.appendChild(wrap);
+  }
+
   /**
    * Capital letters exercise (in-place mistake handling).
    */
   async playCapital(q) {
     this.dock.innerHTML = "";
+    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
+    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initCapitalExercise(this.stageEl, q, async ({ correct }) => {
@@ -319,6 +337,8 @@ export class Game {
    */
   async playSpacing(q) {
     this.dock.innerHTML = "";
+    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
+    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initSpacingExercise(this.stageEl, q, async ({ correct }) => {
@@ -342,6 +362,8 @@ export class Game {
    */
   async playClassify(q) {
     this.dock.innerHTML = "";
+    const sentenceText = q.spoken || (q.words ? q.words.join(" ") : q.sentence || "");
+    this.addReadSentenceBtn(this.dock, sentenceText);
     let questionMistakes = 0;
     return new Promise((resolve) => {
       initClassifierExercise(this.stageEl, q, async ({ correct }) => {
@@ -501,6 +523,35 @@ export class Game {
 
     this.stageEl.revealSolution = fillVisualSlot;
 
+    const choiceSentence = q.spoken || q.sentence || q.lead || "";
+    if (choiceSentence && q.mode !== "sentence-pick") {
+      this.addReadSentenceBtn(this.stageEl, choiceSentence);
+    }
+
+    if (q.mode === "sentence-pick") {
+      this.dock.querySelectorAll("[data-choice-idx]").forEach((btn) => {
+        const idx = Number(btn.dataset.choiceIdx);
+        const text = choices[idx];
+        const wrap = document.createElement("div");
+        wrap.style.cssText = "display:flex;gap:8px;align-items:stretch;";
+        btn.parentNode.insertBefore(wrap, btn);
+        btn.style.flex = "1";
+        wrap.appendChild(btn);
+        const sbtn = document.createElement("button");
+        sbtn.type = "button";
+        sbtn.className = "btn ghost sm";
+        sbtn.style.cssText = "padding:0 12px;min-width:44px;";
+        sbtn.textContent = "🔊";
+        sbtn.setAttribute("aria-label", "Read choice aloud");
+        sbtn.onclick = (e) => {
+          e.stopPropagation();
+          sfx.click();
+          speak(text, { force: true });
+        };
+        wrap.appendChild(sbtn);
+      });
+    }
+
     const allButtons = [
       ...this.stageEl.querySelectorAll("[data-choice-idx]"),
       ...this.dock.querySelectorAll("[data-choice-idx]"),
@@ -531,6 +582,109 @@ export class Game {
             if (shouldReveal) {
               allButtons.forEach((b) => { b.disabled = true; });
               await this.revealAnswer(q);
+              resolve({ solvedByChild: false });
+            }
+          }
+        };
+      });
+    });
+  }
+
+  /**
+   * Interactive Montessori Colors & Symbols Intro (`montessori-intro`):
+   * Teaches and quizzes kids on each grade's Montessori colors, shapes, and parts of speech.
+   */
+  async playMontessoriIntro(q) {
+    const meta = PARTS_OF_SPEECH[q.targetPos];
+    let questionMistakes = 0;
+
+    if (q.askType === "symbol" || q.askType === "example") {
+      const heading = q.askType === "example" ? `"${meta.examples?.[0] || meta.name}" (${meta.name})` : meta.name;
+      this.stageEl.innerHTML = `
+        <div class="sense-q-card">
+          <div style="font-size:1.35rem;font-weight:800;margin-bottom:4px;">${esc(heading)}</div>
+          <p class="sense-q-text" style="margin:4px 0;">${esc(meta.desc)} (like <i>"${esc(meta.examples?.[0] || "")}"</i>)</p>
+          <div style="display:flex;justify-content:center;margin-top:8px;">
+            <button class="btn ghost sm" type="button" id="mi-read-btn">🔊 Read</button>
+          </div>
+        </div>`;
+      this.dock.innerHTML = `
+        <div class="choices" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr));display:grid;gap:10px;">
+          ${q.choices.map((posKey) => `
+            <button class="choice-card" type="button" data-pos="${posKey}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;min-height:84px;">
+              ${montessoriSvg(posKey, 48)}
+            </button>`).join("")}
+        </div>`;
+    } else {
+      this.stageEl.innerHTML = `
+        <div class="sense-q-card" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div>${montessoriSvg(q.targetPos, 64)}</div>
+          <p class="sense-q-text" style="margin:0;">Which part of speech has this symbol?</p>
+          <button class="btn ghost sm" type="button" id="mi-read-btn">🔊 Read</button>
+        </div>`;
+      this.dock.innerHTML = `
+        <div class="choices">
+          ${q.choices.map((posKey) => {
+            const m = PARTS_OF_SPEECH[posKey];
+            return `
+              <div style="display:flex;gap:8px;align-items:stretch;">
+                <button class="choice-card" type="button" data-pos="${posKey}" style="flex:1;text-align:left;">
+                  <b>${esc(m.name)}</b> <span style="opacity:0.75;font-size:0.9em;">— ${esc(m.desc)}</span>
+                </button>
+                <button class="btn ghost sm" type="button" data-speak-pos="${posKey}" aria-label="Read ${esc(m.name)}" style="padding:0 12px;min-width:44px;">🔊</button>
+              </div>`;
+          }).join("")}
+        </div>`;
+    }
+
+    const readBtn = this.stageEl.querySelector("#mi-read-btn");
+    if (readBtn) {
+      readBtn.onclick = () => {
+        sfx.click();
+        speak(q.askType === "symbol" || q.askType === "example" ? `${meta.name}. ${meta.desc}.` : q.instruction, { force: true });
+      };
+    }
+
+    this.dock.querySelectorAll("[data-speak-pos]").forEach((sbtn) => {
+      sbtn.onclick = (e) => {
+        e.stopPropagation();
+        sfx.click();
+        const m = PARTS_OF_SPEECH[sbtn.dataset.speakPos];
+        if (m) speak(`${m.name}. ${m.desc}.`, { force: true });
+      };
+    });
+
+    const buttons = [...this.dock.querySelectorAll("[data-pos]")];
+    return new Promise((resolve) => {
+      buttons.forEach((btn) => {
+        btn.onclick = async () => {
+          const picked = btn.dataset.pos;
+          sfx.select();
+          if (picked === q.targetPos) {
+            btn.classList.add("right");
+            buttons.forEach((b) => { b.disabled = true; });
+            sfx.right();
+            FX.confetti(20);
+            if (q.spoken) speak(q.spoken, { force: true });
+            resolve({ solvedByChild: true });
+          } else {
+            btn.classList.add("wrong");
+            btn.disabled = true;
+            sfx.oops();
+            FX.shake(btn);
+            questionMistakes++;
+            const shouldReveal = this.handleMistake(questionMistakes, q);
+            if (shouldReveal) {
+              buttons.forEach((b) => {
+                b.disabled = true;
+                if (b.dataset.pos === q.targetPos) {
+                  b.classList.remove("wrong");
+                  b.classList.add("right");
+                  FX.pop(b, 1.18);
+                }
+              });
+              sfx.right();
+              await new Promise((r) => setTimeout(r, 900));
               resolve({ solvedByChild: false });
             }
           }

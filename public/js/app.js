@@ -126,8 +126,15 @@ function viewHome() {
 
     ${stickerBook()}`;
   app.querySelectorAll("[data-grade]").forEach((b) => {
-    b.onclick = () => document.getElementById(`grade-${b.dataset.grade}`)?.scrollIntoView({ behavior: "smooth" });
+    b.onclick = () => {
+      S.setSetting("lastWorld", Number(b.dataset.grade));
+      document.getElementById(`grade-${b.dataset.grade}`)?.scrollIntoView({ behavior: "smooth" });
+    };
   });
+  const lastW = Number(S.settings().lastWorld || 0);
+  if (lastW > 1) {
+    requestAnimationFrame(() => document.getElementById(`grade-${lastW}`)?.scrollIntoView({ behavior: "auto" }));
+  }
 }
 
 function viewPlay(id) {
@@ -137,6 +144,7 @@ function viewPlay(id) {
     return;
   }
 
+  S.setSetting("lastWorld", stage.world);
   document.body.classList.add("in-game");
 
   app.innerHTML = `

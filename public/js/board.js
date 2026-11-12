@@ -188,6 +188,9 @@ export function attachSentenceOrganizer({
         ghostEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.08)`;
         const cx = moveEvent.clientX, cy = moveEvent.clientY;
         dropSlots.forEach((s) => s.el.classList.toggle("drop-hover", cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom));
+        const br = bankEl.getBoundingClientRect();
+        const pad = 16;
+        bankEl.classList.toggle("drop-hover", cx >= br.left - pad && cx <= br.right + pad && cy >= br.top - pad && cy <= br.bottom + pad);
       }
     };
 
@@ -197,6 +200,7 @@ export function attachSentenceOrganizer({
       removeEventListener("pointercancel", onPointerUp, true);
       try { tile.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
       dropSlots.forEach((s) => s.el.classList.remove("drop-hover"));
+      bankEl.classList.remove("drop-hover");
       ghostEl?.remove();
       ghostEl = null;
       if (draggedEl) draggedEl.style.opacity = "";
@@ -214,11 +218,18 @@ export function attachSentenceOrganizer({
       if (!wasDragging) { finish(); handleTileTap(el); return; }
       const cx = upEvent.clientX, cy = upEvent.clientY;
       const targetSlot = dropSlots.find((s) => s.el.isConnected && cx >= s.rect.left && cx <= s.rect.right && cy >= s.rect.top && cy <= s.rect.bottom);
+      const br = bankEl.getBoundingClientRect();
+      const pad = 16;
+      const hitBank = cx >= br.left - pad && cx <= br.right + pad && cy >= br.top - pad && cy <= br.bottom + pad;
       finish();
       if (targetSlot) {
         const existingTile = targetSlot.el.querySelector(".word-tile");
         if (existingTile && existingTile !== el) swapOrMoveTiles(el, existingTile);
         else if (!existingTile) { targetSlot.el.appendChild(el); sfx.land(); }
+        onOrderChange?.(getCurrentOrder());
+      } else if (hitBank) {
+        bankEl.appendChild(el);
+        sfx.land();
         onOrderChange?.(getCurrentOrder());
       } else {
         sfx.pop(); // dropped outside: it stays where it was
