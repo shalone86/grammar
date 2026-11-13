@@ -567,3 +567,10 @@
   .mi-legend { grid-template-columns: 1fr 1fr; }
   .mi-legend-row span { display: none; }
 }
+
+/* Grade 1: "Hear it again" just above the sentence */
+.hear-again { display: flex; align-items: center; gap: 6px; margin: 0 auto 8px; padding: 6px 14px; min-height: 40px; border-radius: 999px;
+  border: 2px solid var(--blue, #1d7fe0); background: var(--blue-soft, #e3f0ff); color: var(--blue-ink, #0f4f91);
+  font: 800 1rem var(--font-body); cursor: pointer; box-shadow: 0 3px 0 rgb(29 127 224 / .25); }
+.hear-again:active { transform: translateY(2px); box-shadow: none; }
+@media (orientation: landscape) and (max-height: 520px) { .hear-again { margin-bottom: 4px; min-height: 34px; padding: 3px 12px; font-size: .9rem; } }

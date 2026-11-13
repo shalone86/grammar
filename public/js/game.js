@@ -59,7 +59,8 @@ export class Game {
     else if (q.mode === "spacing") sentence = q.correct ?? q.spoken ?? "";
     else if (q.mode === "classify" || q.mode === "analysis") sentence = q.spoken ?? q.sentence ?? words(q.words);
     else sentence = q.sentence ?? q.prompt ?? q.lead ?? q.text ?? ""; // choice questions: the sentence with its blank, never the answer
-    if (sentence && !parts[0].includes(plain(sentence))) parts.push(plain(sentence));
+    sentence = plain(sentence).replace(/^Find the [^:]+:\s*/i, ""); // the instruction already says what to find
+    if (sentence && !parts[0].includes(sentence)) parts.push(sentence);
     if (q.mode === "montessori-intro" && q.askType === "name") {
       parts.push(`Is it ${q.choices.map((c) => PARTS_OF_SPEECH[c]?.name ?? c).join(", ").replace(/, ([^,]*)$/, ", or $1")}?`);
     } else if (Array.isArray(q.choices) && q.choices.length && q.choices.every((c) => typeof c === "string") && q.mode !== "montessori-intro") {
@@ -67,6 +68,18 @@ export class Game {
       parts.push(`Is it ${names.join(", ").replace(/, ([^,]*)$/, ", or $1")}?`);
     }
     return parts.filter(Boolean).join(" ");
+  }
+
+  /** Grade 1: a clear "Hear it again" button right above the sentence (the same as 💬 in the top bar). */
+  addHearAgain(q) {
+    if (this.stage.world !== 1 || q.mode === "montessori-intro" || !this.stageEl.firstElementChild) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hear-again";
+    btn.dataset.ownSound = "";
+    btn.innerHTML = `🔊 ${q.mode === "order" ? "Hear the words" : "Hear it again"}`;
+    btn.onclick = () => this.readCurrent();
+    this.stageEl.prepend(btn);
   }
 
   /** 💬 in the top bar: read the question again. */
@@ -115,21 +128,17 @@ export class Game {
       let result = { solvedByChild: true };
       const before = this.mistakes;
 
-      if (q.mode === "order") {
-        result = await this.playOrder(q);
-      } else if (q.mode === "capital-start" || q.mode === "capital-names") {
-        result = await this.playCapital(q);
-      } else if (q.mode === "spacing") {
-        result = await this.playSpacing(q);
-      } else if (q.mode === "classify") {
-        result = await this.playClassify(q);
-      } else if (q.mode === "analysis") {
-        result = await this.playAnalysis(q);
-      } else if (q.mode === "montessori-intro") {
-        result = await this.playMontessoriIntro(q);
-      } else {
-        result = await this.playChoice(q);
-      }
+      // Start the question (each one draws its board right away), then add the "Hear it again"
+      // button for grade 1, and wait for the answer.
+      const playing = q.mode === "order" ? this.playOrder(q)
+        : q.mode === "capital-start" || q.mode === "capital-names" ? this.playCapital(q)
+        : q.mode === "spacing" ? this.playSpacing(q)
+        : q.mode === "classify" ? this.playClassify(q)
+        : q.mode === "analysis" ? this.playAnalysis(q)
+        : q.mode === "montessori-intro" ? this.playMontessoriIntro(q)
+        : this.playChoice(q);
+      this.addHearAgain(q);
+      result = await playing;
 
       if (!this.alive) return;
 
