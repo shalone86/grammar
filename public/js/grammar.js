@@ -1,3 +1,4 @@
+import { USAGE_BANKS, USAGE_INSTRUCTIONS, USAGE_INTROS } from "./usage.js";
 // Grammar! Curriculum data, Montessori parts of speech, question banks, and generators for Grades 1, 2, and 3.
 // Pure ES module with no external dependencies. Tested in test/grammar.test.js.
 
@@ -285,6 +286,26 @@ export const STAGES = [
     why: "Add -s for most plurals, and -es when a word ends in s, x, z, ch, or sh.",
   },
   {
+    id: "g1-a-an",
+    world: 1,
+    title: "A or An?",
+    emoji: "🍎",
+    mode: "choice-usage",
+    bank: "a-an",
+    blurb: "A dog, an apple: listen to the next word's first sound.",
+    why: 'Say "an" before a vowel sound (an apple, an owl) and "a" before other sounds (a dog).',
+  },
+  {
+    id: "g1-i-me",
+    world: 1,
+    title: "I or Me? We or Us?",
+    emoji: "🙋",
+    mode: "choice-usage",
+    bank: "i-me",
+    blurb: "I run. Mom hugged me. We pray. Grandma called us.",
+    why: 'I and we do the action; me and us get the action.',
+  },
+  {
     id: "g1-mix",
     world: 1,
     title: "Grade 1 All-Stars",
@@ -396,6 +417,36 @@ export const STAGES = [
     mode: "choice-fragment",
     blurb: "Does it have a who (subject) and a what happened (predicate)?",
     why: "A complete sentence needs both a naming part (subject) and an action part (predicate).",
+  },
+  {
+    id: "g2-is-are",
+    world: 2,
+    title: "Is or Are? Was or Were?",
+    emoji: "🔔",
+    mode: "choice-usage",
+    bank: "is-are",
+    blurb: "The cat is. The cats are. Yesterday it was. Last night they were.",
+    why: "One thing: is or was. More than one (and you): are or were.",
+  },
+  {
+    id: "g2-has-have",
+    world: 2,
+    title: "Has, Have, Had · Do, Does",
+    emoji: "🎒",
+    mode: "choice-usage",
+    bank: "has-have",
+    blurb: "She has, we have, yesterday I had. He does, we do.",
+    why: "He, she, it: has and does. I, you, we, they: have and do. Before: had.",
+  },
+  {
+    id: "g2-see-run",
+    world: 2,
+    title: "Sees, Runs, Gives · Saw, Ran, Gave",
+    emoji: "🏃",
+    mode: "choice-usage",
+    bank: "see-run",
+    blurb: "Mia runs. We run. Yesterday we ran.",
+    why: "One person now adds -s; I, you, we, they don't. Already happened: saw, ran, gave.",
   },
   {
     id: "g2-mix",
@@ -1567,6 +1618,23 @@ export function makeStage(stage, seed = 1, avoidKeys = []) {
       }));
     }
 
+    case "choice-usage": {
+      const sh = pickRotating(USAGE_BANKS[s.bank] ?? [], seed, avoidKeys);
+      return sh.map((q, idx) => ({
+        stageId: s.id,
+        key: itemKey(q),
+        mode: "choice",
+        subMode: "fill-blank",
+        index: idx,
+        instruction: USAGE_INSTRUCTIONS[s.bank] ?? "Pick the word that fits:",
+        prompt: q.prompt,
+        answer: q.correct,
+        choices: shuffle(q.choices, seed + idx),
+        hint: q.hint,
+        spoken: q.spoken,
+      }));
+    }
+
     case "choice-tense": {
       const sh = pickRotating(BANK_G2_PAST_TENSE, seed, avoidKeys);
       return sh.map((q, idx) => ({
@@ -2002,6 +2070,19 @@ export function lessonIntroFor(stage) {
           <div class="word-tile">ran.</div>
         </div><div class="onboarding-caption">Pick the plural word below to pop it into the sentence!</div>`,
       };
+
+    case "choice-usage": {
+      const it = USAGE_INTROS[s.bank];
+      if (!it) return null;
+      return {
+        title: s.title,
+        badgeHtml: it.badge,
+        voice: it.voice,
+        rule: it.rule,
+        exampleHtml: `<div class="onboarding-example-row">${it.words.map((w, i) => `<div class="word-tile${i === it.focus ? " onboarding-focus" : ""}">${w}</div>`).join("")}</div>
+          <div class="onboarding-caption">Pick the word below to pop it into the sentence!</div>`,
+      };
+    }
 
     case "choice-tense":
       return {
